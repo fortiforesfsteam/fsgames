@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Snake Game</title>
+  <style>
+    body {
+      font-family: "Segoe Print", cursive;
+      color: white;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url("https://pbs.twimg.com/media/G5GidTqWkAI0lOu?format=jpg&name=large") no-repeat center center fixed;
+      background-size: cover;
+      overflow: hidden;
+    }
+
+    /* Контейнер для всього контенту */
+    .content {
+      text-align: center;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+    }
+
+    .menu, .settings, .game-over {
+      display: none;
+    }
+
+    .menu {
+      display: block;
+    }
+
+    .game {
+      display: none;
+    }
+
+    canvas {
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+      display: block;
+      margin: auto;
+    }
+
+    button {
+      background-color: white;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      margin: 10px;
+      border-radius: 5px;
+      font-family: "Segoe Print", cursive;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background-color: #ddd;
+      transform: scale(1.05);
+    }
+
+    .info-text {
+      margin-top: 40px;
+      font-size: 14px;
+      opacity: 0.8;
+      white-space: nowrap;
+      text-align: center;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <div id="menu" class="menu">
+      <h1>Snake Game</h1>
+      <p>Best Score: <span id="bestScore">0</span></p>
+      <button onclick="startGame()">Start</button>
+      <button onclick="openSettings()">Setting</button>
+
+      <div class="info-text">
+        Only for PC<br>
+        Controls: WASD<br>
+        Ver 1.1.0
+      </div>
+    </div>
+
+    <div id="settings" class="settings">
+      <h2>Settings</h2>
+      <label>Snake speed: <span id="speedLabel">(X1)</span></label>
+      <input type="range" id="speed" min="0.25" max="2" step="0.25" value="1" onchange="updateSpeed()" />
+      <br />
+      <label>The color of the Snake:</label>
+      <select id="snakeColor">
+        <option value="green" selected>Green</option>
+        <option value="white">White</option>
+        <option value="blue">Blue</option>
+        <option value="yellow">Yellow</option>
+      </select>
+      <br />
+      <button onclick="closeSettings()">Back</button>
+    </div>
+
+    <div id="game" class="game">
+      <canvas id="gameCanvas" width="400" height="400"></canvas>
+      <p>Score: <span id="score">0</span></p>
+    </div>
+
+    <div id="gameOver" class="game-over">
+      <h2>Game Over!</h2>
+      <p>Score: <span id="finalScore">0</span></p>
+      <button onclick="startGame()">Try Again</button>
+      <button onclick="goToMenu()">Back</button>
+    </div>
+  </div>
+
+  <script>
+    let menu = document.getElementById("menu");
+    let settings = document.getElementById("settings");
+    let game = document.getElementById("game");
+    let gameOver = document.getElementById("gameOver");
+    let canvas = document.getElementById("gameCanvas");
+    let ctx = canvas.getContext("2d");
+    let scoreEl = document.getElementById("score");
+    let finalScoreEl = document.getElementById("finalScore");
+    let bestScoreEl = document.getElementById("bestScore");
+    let snakeColor = "green";
+    let speed = 1;
+    let snake, apple, direction, score, interval;
+    let bestScore = localStorage.getItem('snakeBestScore') || 0;
+    bestScoreEl.innerText = bestScore;
+
+    function openSettings() {
+      menu.style.display = "none";
+      settings.style.display = "block";
+    }
+
+    function closeSettings() {
+      settings.style.display = "none";
+      menu.style.display = "block";
+    }
+
+    function updateSpeed() {
+      speed = document.getElementById("speed").value;
+      let labels = {
+        "0.25": "X0.25", "0.5": "X0.5", "0.75": "X0.75", "1": "X1",
+        "1.25": "X1.25", "1.5": "X1.5", "1.75": "X1.75", "2": "X2"
+      };
+      document.getElementById("speedLabel").innerText = `(${labels[speed] || 'X1'})`;
+    }
+
+    function generateApple() {
+      let newApple;
+      do {
+        newApple = {
+          x: Math.floor(Math.random() * 20),
+          y: Math.floor(Math.random() * 20)
+        };
+      } while (snake.some(part => part.x === newApple.x && part.y === newApple.y));
+      return newApple;
+    }
+
+    function startGame() {
+      menu.style.display = "none";
+      gameOver.style.display = "none";
+      game.style.display = "block";
+      snakeColor = document.getElementById("snakeColor").value;
+      runGame();
+    }
+
+    function goToMenu() {
+      gameOver.style.display = "none";
+      menu.style.display = "block";
+    }
+
+    function runGame() {
+      snake = [{x: 10, y: 10}];
+      apple = generateApple();
+      direction = "RIGHT";
+      score = 0;
+      scoreEl.innerText = score;
+      clearInterval(interval);
+      interval = setInterval(updateGame, 200 / parseFloat(speed));
+      document.addEventListener("keydown", changeDirection);
+    }
+
+    function updateGame() {
+      let head = { ...snake[0] };
+      if (direction === "UP") head.y--;
+      if (direction === "DOWN") head.y++;
+      if (direction === "LEFT") head.x--;
+      if (direction === "RIGHT") head.x++;
+
+      snake.unshift(head);
+
+      for (let i = 1; i < snake.length; i++) {
+        if (snake[i].x === head.x && snake[i].y === head.y) {
+          gameOverScreen();
+          return;
+        }
+      }
+
+      if (head.x === apple.x && head.y === apple.y) {
+        score++;
+        scoreEl.innerText = score;
+        apple = generateApple();
+      } else {
+        snake.pop();
+      }
+
+      if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) {
+        gameOverScreen();
+        return;
+      }
+
+      drawGame();
+    }
+
+    function drawGame() {
+      for (let y = 0; y < 20; y++) {
+        for (let x = 0; x < 20; x++) {
+          ctx.fillStyle = (x + y) % 2 === 0 ? "black" : "#212121";
+          ctx.fillRect(x * 20, y * 20, 20, 20);
+        }
+      }
+
+      snake.forEach((part, index) => {
+        ctx.fillStyle = snakeColor;
+        ctx.fillRect(part.x * 20, part.y * 20, 20, 20);
+
+        if (index === 0) {
+          ctx.fillStyle = "black";
+          let cx = part.x * 20;
+          let cy = part.y * 20;
+
+          if (direction === "UP" || direction === "DOWN") {
+            ctx.beginPath();
+            ctx.arc(cx + 5, cy + (direction === "UP" ? 5 : 15), 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cx + 15, cy + (direction === "UP" ? 5 : 15), 2, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.beginPath();
+            ctx.arc(cx + (direction === "LEFT" ? 5 : 15), cy + 5, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cx + (direction === "LEFT" ? 5 : 15), cy + 15, 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      });
+
+      ctx.beginPath();
+      ctx.fillStyle = "red";
+      ctx.arc(apple.x * 20 + 10, apple.y * 20 + 10, 10, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function gameOverScreen() {
+      clearInterval(interval);
+      game.style.display = "none";
+      gameOver.style.display = "block";
+      finalScoreEl.innerText = score;
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('snakeBestScore', bestScore);
+        bestScoreEl.innerText = bestScore;
+      }
+    }
+
+    function changeDirection(e) {
+      const keys = {"W": "UP", "A": "LEFT", "S": "DOWN", "D": "RIGHT"};
+      if (keys[e.key.toUpperCase()]) {
+        let newDirection = keys[e.key.toUpperCase()];
+        if (
+          (direction === "UP" && newDirection === "DOWN") ||
+          (direction === "DOWN" && newDirection === "UP") ||
+          (direction === "LEFT" && newDirection === "RIGHT") ||
+          (direction === "RIGHT" && newDirection === "LEFT")
+        ) return;
+        direction = newDirection;
+      }
+    }
+  </script>
+</body>
+</html>
