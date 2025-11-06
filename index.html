@@ -288,6 +288,40 @@
         direction = newDirection;
       }
     }
+    // Сенсорне управління для мобільних пристроїв
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+canvas.addEventListener("touchstart", (e) => {
+  const touch = e.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+});
+
+canvas.addEventListener("touchend", (e) => {
+  const touch = e.changedTouches[0];
+  touchEndX = touch.clientX;
+  touchEndY = touch.clientY;
+  handleSwipe();
+});
+
+function handleSwipe() {
+  const diffX = touchEndX - touchStartX;
+  const diffY = touchEndY - touchStartY;
+
+  if (Math.abs(diffX) > Math.abs(diffY)) {
+    // Горизонтальний свайп
+    if (diffX > 30 && direction !== "LEFT") direction = "RIGHT";
+    else if (diffX < -30 && direction !== "RIGHT") direction = "LEFT";
+  } else {
+    // Вертикальний свайп
+    if (diffY > 30 && direction !== "UP") direction = "DOWN";
+    else if (diffY < -30 && direction !== "DOWN") direction = "UP";
+  }
+}
   </script>
 </body>
 </html>
+
