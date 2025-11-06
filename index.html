@@ -6,19 +6,20 @@
   <title>Snake Game</title>
   <style>
     body {
-      overscroll-behavior: none;
-      touch-action: none;
-      font-family: "Segoe Print", cursive;
-      color: white;
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: url("https://pbs.twimg.com/media/G5GidTqWkAI0lOu?format=jpg&name=large") no-repeat center center fixed;
-      background-size: cover;
-      overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
+    font-family: "Segoe Print", cursive;
+    color: white;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url("https://pbs.twimg.com/media/G5GidTqWkAI0lOu?format=jpg&name=large") no-repeat center center fixed;
+    background-size: cover;
+    background-position: center;
+    box-sizing: border-box;
     }
 
     /* Контейнер для всього контенту */
@@ -43,11 +44,14 @@
     }
 
     canvas {
-      background-color: rgba(0, 0, 0, 0.7);
-      border-radius: 8px;
-      box-shadow: 0 0 20px rgba(255,255,255,0.3);
-      display: block;
-      margin: auto;
+    width: 90vw;
+    max-width: 400px;
+    height: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    display: block;
+    margin: auto;
     }
 
     button {
@@ -332,6 +336,7 @@ function handleSwipe() {
   </script>
 </body>
 </html>
+
 
 
 
