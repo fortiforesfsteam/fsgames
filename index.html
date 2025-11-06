@@ -6,6 +6,9 @@
   <title>Snake Game</title>
   <style>
     body {
+      overscroll-behavior: none;
+      touch-action: none;
+      }
       font-family: "Segoe Print", cursive;
       color: white;
       margin: 0;
@@ -294,18 +297,24 @@ let touchStartY = 0;
 let touchEndX = 0;
 let touchEndY = 0;
 
+// Забороняємо скролінг під час свайпів
+document.body.style.overflow = "hidden";
+document.body.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+
 canvas.addEventListener("touchstart", (e) => {
+  e.preventDefault();
   const touch = e.touches[0];
   touchStartX = touch.clientX;
   touchStartY = touch.clientY;
-});
+}, { passive: false });
 
 canvas.addEventListener("touchend", (e) => {
+  e.preventDefault();
   const touch = e.changedTouches[0];
   touchEndX = touch.clientX;
   touchEndY = touch.clientY;
   handleSwipe();
-});
+}, { passive: false });
 
 function handleSwipe() {
   const diffX = touchEndX - touchStartX;
@@ -324,4 +333,5 @@ function handleSwipe() {
   </script>
 </body>
 </html>
+
 
