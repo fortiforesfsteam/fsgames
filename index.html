@@ -3,26 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Snake Game</title>
+  <title style="color: green;">Snake Game</title>
   <style>
-    body {
-    overscroll-behavior: none;
-    touch-action: none;
-    font-family: "Segoe Print", cursive;
-    color: white;
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: url("https://pbs.twimg.com/media/G5GidTqWkAI0lOu?format=jpg&name=large") no-repeat center center fixed;
-    background-size: cover;
-    background-position: center;
-    box-sizing: border-box;
+    /* Назву на сторінці стилізуємо зеленим, а не тільки в теге <title> */
+    h1 {
+      color: #00ff00;
+      text-shadow: 0 0 10px #00ff00;
     }
 
-    /* Контейнер для всього контенту */
+    body {
+      overscroll-behavior: none;
+      touch-action: none;
+      font-family: "Segoe Print", cursive;
+      color: white;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url("https://pbs.twimg.com/media/G5GidTqWkAI0lOu?format=jpg&name=large") no-repeat center center fixed;
+      background-size: cover;
+      background-position: center;
+      box-sizing: border-box;
+    }
+
     .content {
       text-align: center;
       background: rgba(0, 0, 0, 0.5);
@@ -44,14 +49,14 @@
     }
 
     canvas {
-    width: 90vw;
-    max-width: 400px;
-    height: auto;
-    background-color: rgba(0, 0, 0, 0.7);
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-    display: block;
-    margin: auto;
+      width: 90vw;
+      max-width: 400px;
+      height: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      display: block;
+      margin: auto;
     }
 
     button {
@@ -108,6 +113,9 @@
         <option value="white">White</option>
         <option value="blue">Blue</option>
         <option value="yellow">Yellow</option>
+        <option value="orange">Orange</option>
+        <option value="purple">Purple</option>
+        <option value="pink">Pink</option>
       </select>
       <br />
       <button onclick="closeSettings()">Back</button>
@@ -294,51 +302,43 @@
         direction = newDirection;
       }
     }
-    // Сенсорне управління для мобільних пристроїв
-let touchStartX = 0;
-let touchStartY = 0;
-let touchEndX = 0;
-let touchEndY = 0;
 
-// Забороняємо скролінг під час свайпів
-document.body.style.overflow = "hidden";
-document.body.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+    // Сенсорне керування
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
 
-canvas.addEventListener("touchstart", (e) => {
-  e.preventDefault();
-  const touch = e.touches[0];
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
-}, { passive: false });
+    document.body.style.overflow = "hidden";
+    document.body.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
 
-canvas.addEventListener("touchend", (e) => {
-  e.preventDefault();
-  const touch = e.changedTouches[0];
-  touchEndX = touch.clientX;
-  touchEndY = touch.clientY;
-  handleSwipe();
-}, { passive: false });
+    canvas.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    }, { passive: false });
 
-function handleSwipe() {
-  const diffX = touchEndX - touchStartX;
-  const diffY = touchEndY - touchStartY;
+    canvas.addEventListener("touchend", (e) => {
+      e.preventDefault();
+      const touch = e.changedTouches[0];
+      touchEndX = touch.clientX;
+      touchEndY = touch.clientY;
+      handleSwipe();
+    }, { passive: false });
 
-  if (Math.abs(diffX) > Math.abs(diffY)) {
-    // Горизонтальний свайп
-    if (diffX > 30 && direction !== "LEFT") direction = "RIGHT";
-    else if (diffX < -30 && direction !== "RIGHT") direction = "LEFT";
-  } else {
-    // Вертикальний свайп
-    if (diffY > 30 && direction !== "UP") direction = "DOWN";
-    else if (diffY < -30 && direction !== "DOWN") direction = "UP";
-  }
-}
+    function handleSwipe() {
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 30 && direction !== "LEFT") direction = "RIGHT";
+        else if (diffX < -30 && direction !== "RIGHT") direction = "LEFT";
+      } else {
+        if (diffY > 30 && direction !== "UP") direction = "DOWN";
+        else if (diffY < -30 && direction !== "DOWN") direction = "UP";
+      }
+    }
   </script>
 </body>
 </html>
-
-
-
-
-
-
