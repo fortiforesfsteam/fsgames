@@ -96,11 +96,40 @@
       <button onclick="openSettings()">Setting</button>
 
       <div class="info-text">
-        It's better to play on PC!<br>
-        Controls: WASD and Swipe on the screen<br>
-        Ver 1.9.5
-      </div>
-    </div>
+  <button id="whatsNewBtn" 
+    style="color: #00ffff; font-size: 14px; font-weight: 600;
+           text-decoration: underline; background: none; border: none;
+           cursor: pointer; margin-bottom: 4px;">
+    What's New?
+  </button><br>
+  It's better to play on PC!<br>
+  Controls: WASD and Swipe on the screen<br>
+  Ver 1.9.5
+</div>
+
+<!-- Вікно What's New -->
+<div id="whatsNewModal" 
+  style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
+         justify-content: center; align-items: center; z-index: 100;">
+  <div style="background: #111; color: white; border-radius: 15px; border: 2px solid #00ffff;
+              padding: 20px; width: 300px; text-align: center; box-shadow: 0 0 20px #00ffff;">
+    <h2 style="color: #00ffff; margin-bottom: 10px;">What's New ✨</h2>
+    <ul style="text-align: left; font-size: 14px; list-style: none; padding-left: 10px;">
+      <li>❔ <b>Added "What's New?"</b></li>
+      <li>💡 <b>Added neon backlight</b></li>
+      <li>🎨 <b>Added new colors:</b></li>
+      <li style="padding-left: 15px;">🟠 Orange</li>
+      <li style="padding-left: 15px;">🟣 Purple</li>
+      <li style="padding-left: 15px;">💗 Pink</li>
+    </ul>
+    <button id="closeModal" 
+      style="margin-top: 15px; background: #00ffff; color: black; font-weight: bold; 
+             border: none; padding: 6px 12px; border-radius: 10px; cursor: pointer;">
+      Close
+    </button>
+  </div>
+</div>
+</div>
 
     <div id="settings" class="settings">
       <h2>Settings</h2>
@@ -245,31 +274,39 @@
       }
 
       snake.forEach((part, index) => {
-        ctx.fillStyle = snakeColor;
-        ctx.fillRect(part.x * 20, part.y * 20, 20, 20);
+  // Увімкнення неонової підсвітки
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = snakeColor;
+  ctx.fillStyle = snakeColor;
+  ctx.fillRect(part.x * 20, part.y * 20, 20, 20);
 
-        if (index === 0) {
-          ctx.fillStyle = "black";
-          let cx = part.x * 20;
-          let cy = part.y * 20;
+  // Вимикаємо тінь після малювання, щоб інші елементи (яблуко, фон) не світилися
+  ctx.shadowBlur = 0;
+  ctx.shadowColor = "transparent";
 
-          if (direction === "UP" || direction === "DOWN") {
-            ctx.beginPath();
-            ctx.arc(cx + 5, cy + (direction === "UP" ? 5 : 15), 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(cx + 15, cy + (direction === "UP" ? 5 : 15), 2, 0, Math.PI * 2);
-            ctx.fill();
-          } else {
-            ctx.beginPath();
-            ctx.arc(cx + (direction === "LEFT" ? 5 : 15), cy + 5, 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(cx + (direction === "LEFT" ? 5 : 15), cy + 15, 2, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-      });
+  // Очі змійки
+  if (index === 0) {
+    ctx.fillStyle = "black";
+    let cx = part.x * 20;
+    let cy = part.y * 20;
+
+    if (direction === "UP" || direction === "DOWN") {
+      ctx.beginPath();
+      ctx.arc(cx + 5, cy + (direction === "UP" ? 5 : 15), 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + 15, cy + (direction === "UP" ? 5 : 15), 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(cx + (direction === "LEFT" ? 5 : 15), cy + 5, 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + (direction === "LEFT" ? 5 : 15), cy + 15, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+});
 
       ctx.beginPath();
       ctx.fillStyle = "red";
@@ -339,7 +376,22 @@
         else if (diffY < -30 && direction !== "DOWN") direction = "UP";
       }
     }
+    // Функціонал "What's New?"
+  const whatsNewBtn = document.getElementById("whatsNewBtn");
+  const whatsNewModal = document.getElementById("whatsNewModal");
+  const closeModal = document.getElementById("closeModal");
+
+  whatsNewBtn.addEventListener("click", () => {
+    whatsNewModal.style.display = "flex";
+  });
+
+  closeModal.addEventListener("click", () => {
+    whatsNewModal.style.display = "none";
+  });
+
+  whatsNewModal.addEventListener("click", (e) => {
+    if (e.target === whatsNewModal) whatsNewModal.style.display = "none";
+  });
   </script>
 </body>
 </html>
-
