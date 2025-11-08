@@ -3,14 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title style="color: green;">Snake Game</title>
+  <title>Snake Game</title>
   <style>
-    /* Назву на сторінці стилізуємо зеленим, а не тільки в теге <title> */
-    h1 {
-      color: #00ff00;
-      text-shadow: 0 0 10px #00ff00;
-    }
-
+    h1 { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
     body {
       overscroll-behavior: none;
       touch-action: none;
@@ -24,10 +19,8 @@
       align-items: center;
       background: url("https://pbs.twimg.com/media/G5GidTqWkAI0lOu?format=jpg&name=large") no-repeat center center fixed;
       background-size: cover;
-      background-position: center;
       box-sizing: border-box;
     }
-
     .content {
       text-align: center;
       background: rgba(0, 0, 0, 0.5);
@@ -35,30 +28,19 @@
       border-radius: 15px;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
     }
-
-    .menu, .settings, .game-over {
-      display: none;
-    }
-
-    .menu {
-      display: block;
-    }
-
-    .game {
-      display: none;
-    }
-
+    .menu, .settings, .game-over { display: none; }
+    .menu { display: block; }
+    .game { display: none; }
     canvas {
       width: 90vw;
       max-width: 400px;
       height: auto;
-      background-color: rgba(0, 0, 0, 0.7);
+      background-color: rgba(0,0,0,0.7);
       border-radius: 8px;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
       display: block;
       margin: auto;
     }
-
     button {
       background-color: white;
       color: black;
@@ -71,11 +53,7 @@
       font-family: "Segoe Print", cursive;
       transition: all 0.3s;
     }
-
-    button:hover {
-      background-color: #ddd;
-      transform: scale(1.05);
-    }
+    button:hover { background-color: #ddd; transform: scale(1.05); }
 
     .info-text {
       margin-top: 40px;
@@ -85,314 +63,392 @@
       text-align: center;
       line-height: 1.4;
     }
+
+    /* --- Achievements --- */
+    #achievementsModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+    }
+    #achievementsModal .window {
+      background: #111;
+      color: white;
+      border-radius: 15px;
+      border: 2px solid #00ff00;
+      padding: 20px;
+      width: 320px;
+      box-shadow: 0 0 20px #00ff00;
+      text-align: left;
+    }
+    .achievement {
+      margin: 8px 0;
+      padding: 8px;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+    .achievement.locked {
+      opacity: 0.3;
+      filter: grayscale(1);
+    }
+    .popup {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #111;
+      border: 2px solid #00ff00;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px #00ff00;
+      opacity: 0;
+      transition: opacity 0.5s, transform 0.5s;
+      transform: translateY(-20px);
+      z-index: 300;
+    }
+    .popup.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
-  <div class="content">
-    <div id="menu" class="menu">
-      <h1>Snake Game</h1>
-      <p>Best Score: <span id="bestScore">0</span></p>
-      <button onclick="startGame()">Start</button>
-      <button onclick="openSettings()">Setting</button>
+<div class="content">
+  <div id="menu" class="menu">
+    <h1>Snake Game</h1>
+    <p>Best Score: <span id="bestScore">0</span></p>
+    <button onclick="startGame()">Start</button>
+    <button onclick="openSettings()">Setting</button>
+    <br>
+    <button onclick="openAchievements()" style="font-size:14px; background:#00ff00;">Achievements</button>
+    <br>
+    <button onclick="resetProgress()" style="font-size:13px; background:none; color:#ff4444; text-decoration:underline;">↺ Reset progress</button>
 
-      <div class="info-text">
-  <button id="whatsNewBtn" 
-    style="color: #00ffff; font-size: 14px; font-weight: 600;
-           text-decoration: underline; background: none; border: none;
-           cursor: pointer; margin-bottom: 4px;">
-    What's New?
-  </button><br>
-  It's better to play on PC!<br>
-  Controls: WASD and Swipe on the screen<br>
-  Ver 1.9.9
-</div>
-
-<!-- Вікно What's New -->
-<div id="whatsNewModal" 
-  style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
-         justify-content: center; align-items: center; z-index: 100;">
-  <div style="background: #111; color: white; border-radius: 15px; border: 2px solid #00ffff;
-              padding: 20px; width: 300px; text-align: center; box-shadow: 0 0 20px #00ffff;">
-    <h2 style="color: #00ffff; margin-bottom: 10px;">What's New ✨</h2>
-    <ul style="text-align: left; font-size: 14px; list-style: none; padding-left: 10px;">
-      <li>❔ <b>Added "What's New?"</b></li>
-      <li>💡 <b>Added neon backlight</b></li>
-      <li>🎨 <b>Added new colors:</b></li>
-      <li style="padding-left: 15px;">🟠 Orange</li>
-      <li style="padding-left: 15px;">🟣 Purple</li>
-      <li style="padding-left: 15px;">💗 Pink</li>
-    </ul>
-    <button id="closeModal" 
-      style="margin-top: 15px; background: #00ffff; color: black; font-weight: bold; 
-             border: none; padding: 6px 12px; border-radius: 10px; cursor: pointer;">
-      Close
-    </button>
-  </div>
-</div>
-</div>
-
-    <div id="settings" class="settings">
-      <h2>Settings</h2>
-      <label>Snake speed: <span id="speedLabel">(X1)</span></label>
-      <input type="range" id="speed" min="0.25" max="2" step="0.25" value="1" onchange="updateSpeed()" />
-      <br />
-      <label>The color of the Snake:</label>
-      <select id="snakeColor">
-        <option value="green" selected>Green</option>
-        <option value="white">White</option>
-        <option value="blue">Blue</option>
-        <option value="yellow">Yellow</option>
-        <option value="orange">Orange</option>
-        <option value="purple">Purple</option>
-        <option value="pink">Pink</option>
-      </select>
-      <br />
-      <button onclick="closeSettings()">Back</button>
+    <div class="info-text">
+      <button id="whatsNewBtn" 
+        style="color: #00ffff; font-size: 14px; font-weight: 600;
+               text-decoration: underline; background: none; border: none;
+               cursor: pointer; margin-bottom: 4px;">
+        What's New?
+      </button><br>
+      It's better to play on PC!<br>
+      Controls: WASD and Swipe<br>
+      Ver 2.0.0
     </div>
 
-    <div id="game" class="game">
-      <canvas id="gameCanvas" width="400" height="400"></canvas>
-      <p>Score: <span id="score">0</span></p>
-    </div>
-
-    <div id="gameOver" class="game-over">
-      <h2>Game Over!</h2>
-      <p>Score: <span id="finalScore">0</span></p>
-      <button onclick="startGame()">Try Again</button>
-      <button onclick="goToMenu()">Back</button>
+    <!-- What's New Modal -->
+    <div id="whatsNewModal" 
+      style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
+             justify-content: center; align-items: center; z-index: 100;">
+      <div style="background: #111; color: white; border-radius: 15px; border: 2px solid #00ffff;
+                  padding: 20px; width: 300px; text-align: center; box-shadow: 0 0 20px #00ffff;">
+        <h2 style="color: #00ffff; margin-bottom: 10px;">What's New ✨</h2>
+        <ul style="text-align: left; font-size: 14px; list-style: none; padding-left: 10px;">
+          <li>Ver <b>2.0.0</b></li>
+          <li>🍎 <b>Added Spawn Apple up to 10</b></li>
+          <li>Added Field sizes: Small / Medium / Large</li>
+          <li>Added Achievements</li>
+          
+          <li style="margin-top:10px;">Ver <b>1.9.9</b></li>
+          <li>❔ <b>Added "What's New?"</b></li>
+          <li>💡 <b>Added neon lighting for the snake</b></li>
+          <li>🎨 <b>Added new colors:</b></li>
+          <li style="padding-left:15px;">🟠 Orange</li>
+          <li style="padding-left:15px;">🟣 Purple</li>
+          <li style="padding-left:15px;">💗 Pink</li>
+        </ul>
+        <button id="closeModal" 
+          style="margin-top: 15px; background: #00ffff; color: black; font-weight: bold; 
+                 border: none; padding: 6px 12px; border-radius: 10px; cursor: pointer;">
+          Close
+        </button>
+      </div>
     </div>
   </div>
 
-  <script>
-    let menu = document.getElementById("menu");
-    let settings = document.getElementById("settings");
-    let game = document.getElementById("game");
-    let gameOver = document.getElementById("gameOver");
-    let canvas = document.getElementById("gameCanvas");
-    let ctx = canvas.getContext("2d");
-    let scoreEl = document.getElementById("score");
-    let finalScoreEl = document.getElementById("finalScore");
-    let bestScoreEl = document.getElementById("bestScore");
-    let snakeColor = "green";
-    let speed = 1;
-    let snake, apple, direction, score, interval;
-    let bestScore = localStorage.getItem('snakeBestScore') || 0;
-    bestScoreEl.innerText = bestScore;
+  <div id="settings" class="settings">
+    <h2>Settings</h2>
+    <label>Snake speed: <span id="speedLabel">(X1)</span></label>
+    <input type="range" id="speed" min="0.25" max="2" step="0.25" value="1" onchange="updateSpeed()" />
+    <br />
+    <label>The color of the Snake:</label>
+    <select id="snakeColor">
+      <option value="green" selected>Green</option>
+      <option value="white">White</option>
+      <option value="blue">Blue</option>
+      <option value="yellow">Yellow</option>
+      <option value="orange">Orange</option>
+      <option value="purple">Purple</option>
+      <option value="pink">Pink</option>
+    </select>
+    <br />
+    <label>Spawn Apple:</label>
+    <select id="appleCount" onchange="updateAppleCount()">
+      <option value="1" selected>1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+    </select>
+    <br />
+    <label>Field size:</label>
+    <select id="fieldSize" onchange="updateFieldSize()">
+      <option value="small" selected>Small</option>
+      <option value="medium">Medium</option>
+      <option value="large">Large</option>
+    </select>
+    <br />
+    <button onclick="closeSettings()">Back</button>
+  </div>
 
-    function openSettings() {
-      menu.style.display = "none";
-      settings.style.display = "block";
+  <div id="game" class="game">
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <p>Score: <span id="score">0</span></p>
+  </div>
+
+  <div id="gameOver" class="game-over">
+    <h2>Game Over!</h2>
+    <p>Score: <span id="finalScore">0</span></p>
+    <button onclick="startGame()">Try Again</button>
+    <button onclick="goToMenu()">Back</button>
+  </div>
+</div>
+
+<!-- Achievements Modal -->
+<div id="achievementsModal">
+  <div class="window">
+    <h2 style="color:#00ff00;">Achievements 🏆</h2>
+    <div id="achievementList"></div>
+    <button onclick="closeAchievements()" style="margin-top:10px;">Close</button>
+  </div>
+</div>
+
+<div id="popup" class="popup"></div>
+
+<script>
+let menu=document.getElementById("menu"),
+    settings=document.getElementById("settings"),
+    game=document.getElementById("game"),
+    gameOver=document.getElementById("gameOver"),
+    canvas=document.getElementById("gameCanvas"),
+    ctx=canvas.getContext("2d"),
+    scoreEl=document.getElementById("score"),
+    finalScoreEl=document.getElementById("finalScore"),
+    bestScoreEl=document.getElementById("bestScore");
+
+let snakeColor="green", speed=1, snake, apples, direction, score, interval;
+let appleCount=1, fieldSize="small", gridCount=20;
+let bestScore=localStorage.getItem('snakeBestScore')||0;
+bestScoreEl.innerText=bestScore;
+
+function openSettings(){ menu.style.display="none"; settings.style.display="block"; }
+function closeSettings(){ settings.style.display="none"; menu.style.display="block"; }
+
+function updateSpeed(){
+  speed=parseFloat(document.getElementById("speed").value);
+  const labels={"0.25":"X0.25","0.5":"X0.5","0.75":"X0.75","1":"X1","1.25":"X1.25","1.5":"X1.5","1.75":"X1.75","2":"X2"};
+  document.getElementById("speedLabel").innerText=`(${labels[speed]||'X1'})`;
+}
+function updateAppleCount(){ appleCount=parseInt(document.getElementById("appleCount").value); }
+function updateFieldSize(){
+  fieldSize=document.getElementById("fieldSize").value;
+  if(fieldSize==="small") gridCount=20;
+  else if(fieldSize==="medium") gridCount=30;
+  else if(fieldSize==="large") gridCount=40;
+}
+
+function generateApples(){
+  apples=[];
+  while(apples.length<appleCount){
+    let newApple;
+    do{ newApple={x:Math.floor(Math.random()*gridCount),y:Math.floor(Math.random()*gridCount)}; }
+    while(snake.some(p=>p.x===newApple.x&&p.y===newApple.y)||apples.some(a=>a.x===newApple.x&&a.y===newApple.y));
+    apples.push(newApple);
+  }
+}
+
+function startGame(){
+  menu.style.display="none"; gameOver.style.display="none"; game.style.display="block";
+  snakeColor=document.getElementById("snakeColor").value;
+  runGame();
+}
+function goToMenu(){ gameOver.style.display="none"; menu.style.display="block"; }
+
+function runGame(){
+  snake=[{x:Math.floor(gridCount/2),y:Math.floor(gridCount/2)}];
+  direction="RIGHT"; score=0; scoreEl.innerText=score;
+  generateApples();
+  clearInterval(interval);
+  interval=setInterval(updateGame,200/speed);
+  document.addEventListener("keydown",changeDirection);
+}
+
+function updateGame(){
+  let head={...snake[0]};
+  if(direction==="UP") head.y--;
+  if(direction==="DOWN") head.y++;
+  if(direction==="LEFT") head.x--;
+  if(direction==="RIGHT") head.x++;
+
+  snake.unshift(head);
+
+  for(let i=1;i<snake.length;i++){ if(snake[i].x===head.x&&snake[i].y===head.y){ gameOverScreen(); return; } }
+
+  let ateApple=false;
+  apples.forEach((apple,i)=>{
+    if(head.x===apple.x&&head.y===apple.y){
+      score++; scoreEl.innerText=score; apples.splice(i,1); ateApple=true;
+      checkAchievements();
     }
+  });
 
-    function closeSettings() {
-      settings.style.display = "none";
-      menu.style.display = "block";
-    }
+  while(apples.length<appleCount){
+    let newApple;
+    do{ newApple={x:Math.floor(Math.random()*gridCount),y:Math.floor(Math.random()*gridCount)}; }
+    while(snake.some(p=>p.x===newApple.x&&p.y===newApple.y)||apples.some(a=>a.x===newApple.x&&a.y===newApple.y));
+    apples.push(newApple);
+  }
 
-    function updateSpeed() {
-      speed = document.getElementById("speed").value;
-      let labels = {
-        "0.25": "X0.25", "0.5": "X0.5", "0.75": "X0.75", "1": "X1",
-        "1.25": "X1.25", "1.5": "X1.5", "1.75": "X1.75", "2": "X2"
-      };
-      document.getElementById("speedLabel").innerText = `(${labels[speed] || 'X1'})`;
-    }
+  if(!ateApple) snake.pop();
+  if(head.x<0||head.x>=gridCount||head.y<0||head.y>=gridCount){ gameOverScreen(); return; }
 
-    function generateApple() {
-      let newApple;
-      do {
-        newApple = {
-          x: Math.floor(Math.random() * 20),
-          y: Math.floor(Math.random() * 20)
-        };
-      } while (snake.some(part => part.x === newApple.x && part.y === newApple.y));
-      return newApple;
-    }
+  drawGame();
+}
 
-    function startGame() {
-      menu.style.display = "none";
-      gameOver.style.display = "none";
-      game.style.display = "block";
-      snakeColor = document.getElementById("snakeColor").value;
-      runGame();
-    }
-
-    function goToMenu() {
-      gameOver.style.display = "none";
-      menu.style.display = "block";
-    }
-
-    function runGame() {
-      snake = [{x: 10, y: 10}];
-      apple = generateApple();
-      direction = "RIGHT";
-      score = 0;
-      scoreEl.innerText = score;
-      clearInterval(interval);
-      interval = setInterval(updateGame, 200 / parseFloat(speed));
-      document.addEventListener("keydown", changeDirection);
-    }
-
-    function updateGame() {
-      let head = { ...snake[0] };
-      if (direction === "UP") head.y--;
-      if (direction === "DOWN") head.y++;
-      if (direction === "LEFT") head.x--;
-      if (direction === "RIGHT") head.x++;
-
-      snake.unshift(head);
-
-      for (let i = 1; i < snake.length; i++) {
-        if (snake[i].x === head.x && snake[i].y === head.y) {
-          gameOverScreen();
-          return;
-        }
-      }
-
-      if (head.x === apple.x && head.y === apple.y) {
-        score++;
-        scoreEl.innerText = score;
-        apple = generateApple();
-      } else {
-        snake.pop();
-      }
-
-      if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) {
-        gameOverScreen();
-        return;
-      }
-
-      drawGame();
-    }
-
-    function drawGame() {
-      for (let y = 0; y < 20; y++) {
-        for (let x = 0; x < 20; x++) {
-          ctx.fillStyle = (x + y) % 2 === 0 ? "black" : "#212121";
-          ctx.fillRect(x * 20, y * 20, 20, 20);
-        }
-      }
-
-      snake.forEach((part, index) => {
-  // Увімкнення неонової підсвітки
-  ctx.shadowBlur = 15;
-  ctx.shadowColor = snakeColor;
-  ctx.fillStyle = snakeColor;
-  ctx.fillRect(part.x * 20, part.y * 20, 20, 20);
-
-  // Вимикаємо тінь після малювання, щоб інші елементи (яблуко, фон) не світилися
-  ctx.shadowBlur = 0;
-  ctx.shadowColor = "transparent";
-
-  // Очі змійки
-  if (index === 0) {
-    ctx.fillStyle = "black";
-    let cx = part.x * 20;
-    let cy = part.y * 20;
-
-    if (direction === "UP" || direction === "DOWN") {
-      ctx.beginPath();
-      ctx.arc(cx + 5, cy + (direction === "UP" ? 5 : 15), 2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cx + 15, cy + (direction === "UP" ? 5 : 15), 2, 0, Math.PI * 2);
-      ctx.fill();
-    } else {
-      ctx.beginPath();
-      ctx.arc(cx + (direction === "LEFT" ? 5 : 15), cy + 5, 2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cx + (direction === "LEFT" ? 5 : 15), cy + 15, 2, 0, Math.PI * 2);
-      ctx.fill();
+function drawGame(){
+  let cellSize=canvas.width/gridCount;
+  for(let y=0;y<gridCount;y++){
+    for(let x=0;x<gridCount;x++){
+      ctx.fillStyle=(x+y)%2===0?"black":"#212121";
+      ctx.fillRect(x*cellSize,y*cellSize,cellSize,cellSize);
     }
   }
-});
 
-      ctx.beginPath();
-      ctx.fillStyle = "red";
-      ctx.arc(apple.x * 20 + 10, apple.y * 20 + 10, 10, 0, Math.PI * 2);
-      ctx.fill();
-    }
+  snake.forEach((part,index)=>{
+    ctx.shadowBlur=15; ctx.shadowColor=snakeColor;
+    ctx.fillStyle=snakeColor;
+    ctx.fillRect(part.x*cellSize,part.y*cellSize,cellSize,cellSize);
+    ctx.shadowBlur=0; ctx.shadowColor="transparent";
 
-    function gameOverScreen() {
-      clearInterval(interval);
-      game.style.display = "none";
-      gameOver.style.display = "block";
-      finalScoreEl.innerText = score;
-      if (score > bestScore) {
-        bestScore = score;
-        localStorage.setItem('snakeBestScore', bestScore);
-        bestScoreEl.innerText = bestScore;
-      }
-    }
-
-    function changeDirection(e) {
-      const keys = {"W": "UP", "A": "LEFT", "S": "DOWN", "D": "RIGHT"};
-      if (keys[e.key.toUpperCase()]) {
-        let newDirection = keys[e.key.toUpperCase()];
-        if (
-          (direction === "UP" && newDirection === "DOWN") ||
-          (direction === "DOWN" && newDirection === "UP") ||
-          (direction === "LEFT" && newDirection === "RIGHT") ||
-          (direction === "RIGHT" && newDirection === "LEFT")
-        ) return;
-        direction = newDirection;
-      }
-    }
-
-    // Сенсорне керування
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchEndX = 0;
-    let touchEndY = 0;
-
-    document.body.style.overflow = "hidden";
-    document.body.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
-
-    canvas.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
-    }, { passive: false });
-
-    canvas.addEventListener("touchend", (e) => {
-      e.preventDefault();
-      const touch = e.changedTouches[0];
-      touchEndX = touch.clientX;
-      touchEndY = touch.clientY;
-      handleSwipe();
-    }, { passive: false });
-
-    function handleSwipe() {
-      const diffX = touchEndX - touchStartX;
-      const diffY = touchEndY - touchStartY;
-
-      if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (diffX > 30 && direction !== "LEFT") direction = "RIGHT";
-        else if (diffX < -30 && direction !== "RIGHT") direction = "LEFT";
+    if(index===0){
+      ctx.fillStyle="black";
+      let cx=part.x*cellSize, cy=part.y*cellSize;
+      if(direction==="UP"||direction==="DOWN"){
+        ctx.beginPath(); ctx.arc(cx+cellSize*0.25,cy+(direction==="UP"?cellSize*0.25:cellSize*0.75),2,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx+cellSize*0.75,cy+(direction==="UP"?cellSize*0.25:cellSize*0.75),2,0,Math.PI*2); ctx.fill();
       } else {
-        if (diffY > 30 && direction !== "UP") direction = "DOWN";
-        else if (diffY < -30 && direction !== "DOWN") direction = "UP";
+        ctx.beginPath(); ctx.arc(cx+(direction==="LEFT"?cellSize*0.25:cellSize*0.75),cy+cellSize*0.25,2,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx+(direction==="LEFT"?cellSize*0.25:cellSize*0.75),cy+cellSize*0.75,2,0,Math.PI*2); ctx.fill();
       }
     }
-    // Функціонал "What's New?"
-  const whatsNewBtn = document.getElementById("whatsNewBtn");
-  const whatsNewModal = document.getElementById("whatsNewModal");
-  const closeModal = document.getElementById("closeModal");
-
-  whatsNewBtn.addEventListener("click", () => {
-    whatsNewModal.style.display = "flex";
   });
 
-  closeModal.addEventListener("click", () => {
-    whatsNewModal.style.display = "none";
+  apples.forEach(a=>{
+    ctx.beginPath(); ctx.fillStyle="red";
+    ctx.arc(a.x*cellSize+cellSize/2,a.y*cellSize+cellSize/2,cellSize/2,0,Math.PI*2);
+    ctx.fill();
   });
+}
 
-  whatsNewModal.addEventListener("click", (e) => {
-    if (e.target === whatsNewModal) whatsNewModal.style.display = "none";
+function gameOverScreen(){
+  clearInterval(interval); game.style.display="none"; gameOver.style.display="block";
+  finalScoreEl.innerText=score;
+  if(score>bestScore){ bestScore=score; localStorage.setItem('snakeBestScore',bestScore); bestScoreEl.innerText=bestScore; }
+}
+
+/* --- Controls --- */
+function changeDirection(e){
+  const keys={"W":"UP","A":"LEFT","S":"DOWN","D":"RIGHT"};
+  if(keys[e.key.toUpperCase()]){
+    let newDir=keys[e.key.toUpperCase()];
+    if((direction==="UP"&&newDir==="DOWN")||(direction==="DOWN"&&newDir==="UP")||(direction==="LEFT"&&newDir==="RIGHT")||(direction==="RIGHT"&&newDir==="LEFT")) return;
+    direction=newDir;
+  }
+}
+
+/* --- Touch --- */
+let touchStartX=0,touchStartY=0,touchEndX=0,touchEndY=0;
+document.body.style.overflow="hidden";
+document.body.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
+canvas.addEventListener("touchstart",e=>{const t=e.touches[0]; touchStartX=t.clientX; touchStartY=t.clientY;},{passive:false});
+canvas.addEventListener("touchend",e=>{const t=e.changedTouches[0]; touchEndX=t.clientX; touchEndY=t.clientY; handleSwipe();},{passive:false});
+function handleSwipe(){
+  const diffX=touchEndX-touchStartX, diffY=touchEndY-touchStartY;
+  if(Math.abs(diffX)>Math.abs(diffY)){
+    if(diffX>30&&direction!=="LEFT") direction="RIGHT";
+    else if(diffX<-30&&direction!=="RIGHT") direction="LEFT";
+  } else {
+    if(diffY>30&&direction!=="UP") direction="DOWN";
+    else if(diffY<-30&&direction!=="DOWN") direction="UP";
+  }
+}
+
+/* --- Achievements --- */
+const achievements=[
+  {id:1, title:"✨Eat the first apple 🍎🐍", condition:1},
+  {id:2, title:"Eat twenty apples 🍎", condition:20},
+  {id:3, title:"Eat forty apples 🍎", condition:40},
+  {id:4, title:"Eat sixty apples 🍎", condition:60},
+  {id:5, title:"Eat eighty apples 🍎", condition:80},
+  {id:6, title:"Eat one hundred apples 🍎", condition:100},
+];
+let unlocked=JSON.parse(localStorage.getItem('snakeAchievements')||'[]');
+
+function checkAchievements(){
+  achievements.forEach(a=>{
+    if(score>=a.condition&&!unlocked.includes(a.id)){
+      unlocked.push(a.id);
+      localStorage.setItem('snakeAchievements',JSON.stringify(unlocked));
+      showPopup(`Achievement Unlocked! 🏆<br>${a.title}`);
+    }
   });
-  </script>
+}
+
+function showPopup(text){
+  const popup=document.getElementById("popup");
+  popup.innerHTML=text;
+  popup.classList.add("show");
+  setTimeout(()=>popup.classList.remove("show"),2500);
+}
+
+function openAchievements(){
+  menu.style.display="none";
+  const modal=document.getElementById("achievementsModal");
+  modal.style.display="flex";
+  const list=document.getElementById("achievementList");
+  list.innerHTML="";
+  achievements.forEach(a=>{
+    const div=document.createElement("div");
+    div.className="achievement"+(unlocked.includes(a.id)?"":" locked");
+    div.innerHTML=a.title;
+    list.appendChild(div);
+  });
+}
+
+function closeAchievements(){
+  document.getElementById("achievementsModal").style.display="none";
+  menu.style.display="block";
+}
+
+function resetProgress(){
+  if(confirm("Reset all progress?")){
+    localStorage.removeItem('snakeAchievements');
+    localStorage.removeItem('snakeBestScore');
+    unlocked=[]; bestScore=0; bestScoreEl.innerText=0;
+  }
+}
+
+/* --- What's New modal --- */
+document.getElementById("whatsNewBtn").onclick=()=>{ document.getElementById("whatsNewModal").style.display="flex"; };
+document.getElementById("closeModal").onclick=()=>{ document.getElementById("whatsNewModal").style.display="none"; };
+</script>
 </body>
 </html>
-
