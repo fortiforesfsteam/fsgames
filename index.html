@@ -95,24 +95,24 @@
       filter: grayscale(1);
     }
     .popup {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #111;
-      border: 2px solid #00ff00;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px #00ff00;
-      opacity: 0;
-      transition: opacity 0.5s, transform 0.5s;
-      transform: translateY(-20px);
-      z-index: 300;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: #111;
+    border: 2px solid #00ff00;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px #00ff00;
+    opacity: 0;
+    transition: opacity 0.5s, transform 0.5s;
+    z-index: 300;
     }
-    .popup.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .popup.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+   }
   </style>
 </head>
 <body>
@@ -151,6 +151,7 @@
           <li>🍎 <b>Added Spawn Apple up to 10</b></li>
           <li>Added Field sizes: Small / Medium / Large</li>
           <li>Added Achievements</li>
+          <li>Added ↺ Reset progress</li>
           
           <li style="margin-top:10px;">Ver <b>1.9.9</b></li>
           <li>❔ <b>Added "What's New?"</b></li>
