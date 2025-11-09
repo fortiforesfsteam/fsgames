@@ -4,7 +4,8 @@
 const playlist = [
   { title: "I & Me", src: "music/I & Me.mp3" },
   { title: "I Told You", src: "music/I Told You.mp3" },
-  { title: "Warm", src: "music/Warm.mp3" }
+  { title: "Warm", src: "music/Warm.mp3" },
+  { title: "TornNament", src: "music/TornNament.mp3" }
 ];
 
 
@@ -201,3 +202,4 @@ function startMusic() {
 
 // слухаємо будь-який клік на сторінці
 window.addEventListener("click", startMusic);
+
