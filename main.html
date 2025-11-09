@@ -136,7 +136,7 @@
       </button><br>
       It's better to play on PC!<br>
       Controls: WASD and Swipe<br>
-      Ver 2.0.6
+      Ver 2.0.7
     </div>
 
     <!-- What's New Modal -->
@@ -147,18 +147,15 @@
                   padding: 20px; width: 300px; text-align: center; box-shadow: 0 0 20px #00ffff;">
         <h2 style="color: #00ffff; margin-bottom: 10px;">What's New ✨</h2>
         <ul style="text-align: left; font-size: 14px; list-style: none; padding-left: 10px;">
-          <li>Ver <b>2.0.6</b></li>
+          <li>Ver <b>2.0.7</b></li>
+          <li>🏆 <b>Added a new achievement</li>
+            
+          <li style="margin-top:10px;">Ver <b>2.0.6</b></li>
           <li>🎵 <b>Added three more tracks to the playlist</li>
           <li>Added gif to background</li>
           
           <li style="margin-top:10px;">Ver <b>2.0.4</b></li>
-          <li>🎵 <b>Added player and three tracks</li>
-          
-          <li style="margin-top:10px;">Ver <b>2.0.0</b></li>
-          <li>🍎 <b>Added Spawn Apple up to 10</b></li>
-          <li>Added Field sizes: Small / Medium / Large</li>
-          <li>Added Achievements</li>
-          <li>Added ↺ Reset progress</li>
+          <li>🎵 <b>Added player and three tracks</li>          
         </ul>
         <button id="closeModal" 
           style="margin-top: 15px; background: #00ffff; color: black; font-weight: bold; 
@@ -358,12 +355,26 @@ function drawGame(){
   });
 }
 
+// Функція gameOverScreen із відкриттям "First loss"
 function gameOverScreen(){
-  clearInterval(interval); game.style.display="none"; gameOver.style.display="block";
-  finalScoreEl.innerText=score;
-  if(score>bestScore){ bestScore=score; localStorage.setItem('snakeBestScore',bestScore); bestScoreEl.innerText=bestScore; }
-}
+  clearInterval(interval);
+  game.style.display = "none";
+  gameOver.style.display = "block";
+  finalScoreEl.innerText = score;
 
+  if(score > bestScore){
+    bestScore = score;
+    localStorage.setItem('snakeBestScore', bestScore);
+    bestScoreEl.innerText = bestScore;
+  }
+
+  // Відкриття досягнення "First loss" при першому програші
+  if(!unlocked.includes(2)){
+    unlocked.push(2);
+    localStorage.setItem('snakeAchievements', JSON.stringify(unlocked));
+    showPopup(`Achievement Unlocked! 🏆<br>First loss💀`);
+  }
+}
 /* --- Controls --- */
 function changeDirection(e){
   const keys={"W":"UP","A":"LEFT","S":"DOWN","D":"RIGHT"};
@@ -394,19 +405,21 @@ function handleSwipe(){
 /* --- Achievements --- */
 const achievements=[
   {id:1, title:"✨Eat the first apple 🍎🐍", condition:1},
-  {id:2, title:"Eat twenty apples 🍎", condition:20},
-  {id:3, title:"Eat forty apples 🍎", condition:40},
-  {id:4, title:"Eat sixty apples 🍎", condition:60},
-  {id:5, title:"Eat eighty apples 🍎", condition:80},
-  {id:6, title:"Eat one hundred apples 🍎", condition:100},
+  {id:2, title:"First loss💀", condition:"firstLoss"},
+  {id:3, title:"Eat twenty apples 🍎", condition:20},
+  {id:4, title:"Eat forty apples 🍎", condition:40},
+  {id:5, title:"Eat sixty apples 🍎", condition:60},
+  {id:6, title:"Eat eighty apples 🍎", condition:80},
+  {id:7, title:"Eat one hundred apples 🍎", condition:100},
 ];
-let unlocked=JSON.parse(localStorage.getItem('snakeAchievements')||'[]');
+let unlocked = JSON.parse(localStorage.getItem('snakeAchievements') || '[]');
 
+// Перевірка досягнень при їжі яблука
 function checkAchievements(){
-  achievements.forEach(a=>{
-    if(score>=a.condition&&!unlocked.includes(a.id)){
+  achievements.forEach(a => {
+    if(typeof a.condition === "number" && score >= a.condition && !unlocked.includes(a.id)){
       unlocked.push(a.id);
-      localStorage.setItem('snakeAchievements',JSON.stringify(unlocked));
+      localStorage.setItem('snakeAchievements', JSON.stringify(unlocked));
       showPopup(`Achievement Unlocked! 🏆<br>${a.title}`);
     }
   });
@@ -420,15 +433,17 @@ function showPopup(text){
 }
 
 function openAchievements(){
-  menu.style.display="none";
-  const modal=document.getElementById("achievementsModal");
-  modal.style.display="flex";
-  const list=document.getElementById("achievementList");
-  list.innerHTML="";
-  achievements.forEach(a=>{
-    const div=document.createElement("div");
-    div.className="achievement"+(unlocked.includes(a.id)?"":" locked");
-    div.innerHTML=a.title;
+  menu.style.display = "none";
+  const modal = document.getElementById("achievementsModal");
+  modal.style.display = "flex";
+
+  const list = document.getElementById("achievementList");
+  list.innerHTML = "";
+
+  achievements.forEach(a => {
+    const div = document.createElement("div");
+    div.className = "achievement" + (unlocked.includes(a.id) ? "" : " locked");
+    div.innerHTML = a.title;
     list.appendChild(div);
   });
 }
@@ -455,7 +470,3 @@ document.getElementById("closeModal").onclick=()=>{ document.getElementById("wha
 <script src="player.js"></script>
 </body>
 </html>
-
-
-
-
