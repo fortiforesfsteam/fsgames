@@ -17,7 +17,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: url("https://pbs.twimg.com/media/G5GidTqWkAI0lOu?format=jpg&name=large") no-repeat center center fixed;
+      background: url("https://gifer.com/ru/fzcB") no-repeat center center fixed;
       background-size: cover;
       box-sizing: border-box;
     }
@@ -123,7 +123,7 @@
     <button onclick="startGame()">Start</button>
     <button onclick="openSettings()">Setting</button>
     <br>
-    <button onclick="openAchievements()" style="font-size:14px; background:#00ff00;">Achievements</button>
+    <button onclick="openAchievements()" style="font-size:14px; background:#00de00;">Achievements 🏆</button>
     <br>
     <button onclick="resetProgress()" style="font-size:13px; background:none; color:#ff4444; text-decoration:underline;">↺ Reset progress</button>
 
@@ -136,7 +136,7 @@
       </button><br>
       It's better to play on PC!<br>
       Controls: WASD and Swipe<br>
-      Ver 2.0.4
+      Ver 2.0.6
     </div>
 
     <!-- What's New Modal -->
@@ -147,22 +147,18 @@
                   padding: 20px; width: 300px; text-align: center; box-shadow: 0 0 20px #00ffff;">
         <h2 style="color: #00ffff; margin-bottom: 10px;">What's New ✨</h2>
         <ul style="text-align: left; font-size: 14px; list-style: none; padding-left: 10px;">
-          <li>Ver <b>2.0.4</b></li>
-          <li>Added player and three tracks</li>
+          <li>Ver <b>2.0.6</b></li>
+          <li>🎵 <b>Added three more tracks to the playlist</li>
+          <li>Added gif to background</li>
+          
+          <li style="margin-top:10px;">Ver <b>2.0.4</b></li>
+          <li>🎵 <b>Added player and three tracks</li>
           
           <li style="margin-top:10px;">Ver <b>2.0.0</b></li>
           <li>🍎 <b>Added Spawn Apple up to 10</b></li>
           <li>Added Field sizes: Small / Medium / Large</li>
           <li>Added Achievements</li>
           <li>Added ↺ Reset progress</li>
-          
-          <li style="margin-top:10px;">Ver <b>1.9.9</b></li>
-          <li>❔ <b>Added "What's New?"</b></li>
-          <li>💡 <b>Added neon lighting for the snake</b></li>
-          <li>🎨 <b>Added new colors:</b></li>
-          <li style="padding-left:15px;">🟠 Orange</li>
-          <li style="padding-left:15px;">🟣 Purple</li>
-          <li style="padding-left:15px;">💗 Pink</li>
         </ul>
         <button id="closeModal" 
           style="margin-top: 15px; background: #00ffff; color: black; font-weight: bold; 
@@ -459,5 +455,6 @@ document.getElementById("closeModal").onclick=()=>{ document.getElementById("wha
 <script src="player.js"></script>
 </body>
 </html>
+
 
 
