@@ -246,6 +246,37 @@ let appleCount=1, fieldSize="small", gridCount=20;
 let bestScore=localStorage.getItem('snakeBestScore')||0;
 bestScoreEl.innerText=bestScore;
 
+/* --- Завантаження збережених налаштувань --- */
+const savedSettings = JSON.parse(localStorage.getItem('snakeSettings') || '{}');
+if(savedSettings.snakeColor) document.getElementById("snakeColor").value = savedSettings.snakeColor;
+if(savedSettings.speed){
+  document.getElementById("speed").value = savedSettings.speed;
+  speed = parseFloat(savedSettings.speed);
+  updateSpeed();
+}
+if(savedSettings.appleCount){
+  document.getElementById("appleCount").value = savedSettings.appleCount;
+  appleCount = parseInt(savedSettings.appleCount);
+}
+if(savedSettings.fieldSize){
+  document.getElementById("fieldSize").value = savedSettings.fieldSize;
+  fieldSize = savedSettings.fieldSize;
+  updateFieldSize();
+}
+
+/* --- Збереження налаштувань --- */
+function saveSettings(){
+  const settingsData = {
+    snakeColor: document.getElementById("snakeColor").value,
+    speed: document.getElementById("speed").value,
+    appleCount: document.getElementById("appleCount").value,
+    fieldSize: document.getElementById("fieldSize").value
+  };
+  localStorage.setItem('snakeSettings', JSON.stringify(settingsData));
+}
+
+document.getElementById("snakeColor").addEventListener("change", saveSettings);
+
 function openSettings(){ menu.style.display="none"; settings.style.display="block"; }
 function closeSettings(){ settings.style.display="none"; menu.style.display="block"; }
 
@@ -253,13 +284,20 @@ function updateSpeed(){
   speed=parseFloat(document.getElementById("speed").value);
   const labels={"0.25":"X0.25","0.5":"X0.5","0.75":"X0.75","1":"X1","1.25":"X1.25","1.5":"X1.5","1.75":"X1.75","2":"X2"};
   document.getElementById("speedLabel").innerText=`(${labels[speed]||'X1'})`;
+  saveSettings();
 }
-function updateAppleCount(){ appleCount=parseInt(document.getElementById("appleCount").value); }
+
+function updateAppleCount(){
+  appleCount=parseInt(document.getElementById("appleCount").value);
+  saveSettings();
+}
+
 function updateFieldSize(){
   fieldSize=document.getElementById("fieldSize").value;
   if(fieldSize==="small") gridCount=20;
   else if(fieldSize==="medium") gridCount=30;
   else if(fieldSize==="large") gridCount=40;
+  saveSettings();
 }
 
 function generateApples(){
@@ -470,3 +508,4 @@ document.getElementById("closeModal").onclick=()=>{ document.getElementById("wha
 <script src="player.js"></script>
 </body>
 </html>
+
