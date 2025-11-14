@@ -27,10 +27,11 @@
       padding: 30px;
       border-radius: 15px;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+      position: relative;
     }
     .menu, .settings, .game-over { display: none; }
     .menu { display: block; }
-    .game { display: none; }
+    .game { display: none; position: relative; } /* відносне для абсолютних елементів всередині */
     canvas {
       width: 90vw;
       max-width: 400px;
@@ -40,6 +41,8 @@
       box-shadow: 0 0 20px rgba(255,255,255,0.3);
       display: block;
       margin: auto;
+      position: relative;
+      z-index: 1;
     }
     button {
       background-color: white;
@@ -62,6 +65,67 @@
       white-space: nowrap;
       text-align: center;
       line-height: 1.4;
+    }
+
+    /* Overlay, що затемнює ТІЛЬКИ поле гри */
+    .pause-overlay {
+      display: none;
+      position: absolute;
+      z-index: 50;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 50%;
+      transform-origin: center;
+      border-radius: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+    .pause-overlay .backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      border-radius: 8px;
+      z-index: 51;
+    }
+    .pause-overlay .window {
+      position: relative;
+      z-index: 52;
+      min-width: 220px;
+      background: #111;
+      border: 2px solid #00ff00;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #00ff00;
+      text-align: center;
+      color: white;
+    }
+    .pause-overlay .window button { margin: 8px; }
+
+    /* Кнопка паузи для телефонів у правому верхньому куті канвасу */
+    .mobile-pause-btn {
+      position: fixed;
+      z-index: 999;
+      top: 6px;
+      right: 6px;
+      background: rgba(0,0,0,0.6);
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      border-radius: 8px;
+      width: 40px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00ff00;
+      user-select: none;
+    }
+
+    /* показувати кнопку сильно помітно лише на touch-пристроях / малих екранах */
+    @media (min-width: 601px) {
+      /* ховати на десктопі (але можна показувати за бажанням) */
+      .mobile-pause-btn { display: none; }
     }
 
     /* --- Achievements --- */
@@ -95,24 +159,28 @@
       filter: grayscale(1);
     }
     .popup {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-20px);
-    background: #111;
-    border: 2px solid #00ff00;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px #00ff00;
-    opacity: 0;
-    transition: opacity 0.5s, transform 0.5s;
-    z-index: 300;
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: #111;
+      border: 2px solid #00ff00;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px #00ff00;
+      opacity: 0;
+      transition: opacity 0.5s, transform 0.5s;
+      z-index: 300;
     }
-  .popup.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-   }
+    .popup.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      50.1%, 100% { opacity: 0.2; }
+    }
   </style>
 </head>
 <body>
@@ -128,16 +196,36 @@
     <button onclick="resetProgress()" style="font-size:13px; background:none; color:#ff4444; text-decoration:underline;">↺ Reset progress</button>
 
     <div class="info-text">
-      <button id="whatsNewBtn" 
-        style="color: #00ffff; font-size: 14px; font-weight: 600;
-               text-decoration: underline; background: none; border: none;
-               cursor: pointer; margin-bottom: 4px;">
-        What's New?
-      </button><br>
-      It's better to play on PC!<br>
-      Controls: WASD and Swipe<br>
-      Ver 2.0.9
-    </div>
+  <div style="display:inline-flex; align-items:center; gap:6px;">
+    <button id="whatsNewBtn"
+      style="color:#00ffff; font-size:14px; font-weight:600;
+             text-decoration:underline; background:none; border:none;
+             cursor:pointer; margin-bottom:4px;">
+      What's New?
+    </button>
+    <span id="whatsBadge"
+      style="
+        display:none;
+        width:16px;
+        height:16px;
+        background:red;
+        color:white;
+        border-radius:50%;
+        font-size:11px;
+        font-weight:bold;
+        align-items:center;
+        justify-content:center;
+        display:flex;
+        animation:blink 1s infinite;
+      ">
+      1
+    </span>
+  </div>
+  <br>
+  It's better to play on PC!<br>
+  Controls: WASD and Swipe — Pause: Space / ▐▐ (on phone)<br>
+  Ver 2.1.2
+</div>
 
     <!-- What's New Modal -->
     <div id="whatsNewModal" 
@@ -145,17 +233,19 @@
              justify-content: center; align-items: center; z-index: 100;">
       <div style="background: #111; color: white; border-radius: 15px; border: 2px solid #00ffff;
                   padding: 20px; width: 300px; text-align: center; box-shadow: 0 0 20px #00ffff;">
-        <h2 style="color: #00ffff; margin-bottom: 10px;">What's New ✨</h2>
+        <h2 style="color: #00ffff; margin-bottom: 10px;">What's New? ✨</h2>
         <ul style="text-align: left; font-size: 14px; list-style: none; padding-left: 10px;">
-          <li>Ver <b>2.0.9</b></li>
+          <li>Ver <b>2.1.2💚</b></li>
+          <li>⏸ <b>Added game pause</li>
+          <li>🎵 <b>Added four tracks and removed one track</li>
+          <li>⚙ <b>Various small updates</li>
+        
+          
+          <li style="margin-top:10px;">Ver <b>2.0.9</b></li>
           <li>💾 <b>Added save settings</li>
           
           <li style="margin-top:10px;">Ver <b>2.0.7</b></li>
-          <li>🏆 <b>Added a new achievement</li>
-            
-          <li style="margin-top:10px;">Ver <b>2.0.6</b></li>
-          <li>🎵 <b>Added three more tracks to the playlist</li>
-          <li>Added gif to background</li>     
+          <li>🏆 <b>Added a new achievement</li>                     
         </ul>
         <button id="closeModal" 
           style="margin-top: 15px; background: #00ffff; color: black; font-weight: bold; 
@@ -207,8 +297,24 @@
   </div>
 
   <div id="game" class="game">
+    <!-- мобільна кнопка паузи (правий верхній кут) -->
+    <div id="mobilePauseBtn" class="mobile-pause-btn" title="Pause">▐▐</div>
+
     <canvas id="gameCanvas" width="400" height="400"></canvas>
     <p>Score: <span id="score">0</span></p>
+
+    <!-- Overlay, що затемнює лише поле гри -->
+    <div id="pauseOverlay" class="pause-overlay">
+      <div class="backdrop"></div>
+      <div class="window">
+        <h3>Paused</h3>
+        <div style="margin-top:8px;">
+          <button id="continueBtn">Continue</button>
+          <button id="exitBtn" style="background:#ff6666;color:white;">Exit</button>
+        </div>
+        <p style="font-size:12px; opacity:0.8; margin-top:8px;">Press Space to resume</p>
+      </div>
+    </div>
   </div>
 
   <div id="gameOver" class="game-over">
@@ -245,6 +351,13 @@ let snakeColor="green", speed=1, snake, apples, direction, score, interval;
 let appleCount=1, fieldSize="small", gridCount=20;
 let bestScore=localStorage.getItem('snakeBestScore')||0;
 bestScoreEl.innerText=bestScore;
+
+const pauseOverlay = document.getElementById("pauseOverlay");
+const mobilePauseBtn = document.getElementById("mobilePauseBtn");
+const continueBtn = document.getElementById("continueBtn");
+const exitBtn = document.getElementById("exitBtn");
+
+let paused = false;
 
 /* --- Завантаження збережених налаштувань --- */
 const savedSettings = JSON.parse(localStorage.getItem('snakeSettings') || '{}');
@@ -291,7 +404,6 @@ function updateAppleCount(){
   appleCount=parseInt(document.getElementById("appleCount").value);
   saveSettings();
 }
-
 function updateFieldSize(){
   fieldSize=document.getElementById("fieldSize").value;
   if(fieldSize==="small") gridCount=20;
@@ -313,20 +425,118 @@ function generateApples(){
 function startGame(){
   menu.style.display="none"; gameOver.style.display="none"; game.style.display="block";
   snakeColor=document.getElementById("snakeColor").value;
+  // позиціонування overlay над самим canvas: підганяємо розміри і позицію
+  positionPauseOverlay();
   runGame();
 }
 function goToMenu(){ gameOver.style.display="none"; menu.style.display="block"; }
 
+/* --- Pause / Resume / Exit logic --- */
+function positionPauseOverlay(){
+  // підганяємо overlay розміром і позицією над canvas
+  const rect = canvas.getBoundingClientRect();
+  // встановлюємо стилі так, щоб overlay розміщувався точно над канвасом всередині .game
+  const overlay = pauseOverlay;
+  overlay.style.display = 'none';
+  overlay.style.width = rect.width + 'px';
+  overlay.style.height = rect.height + 'px';
+  // top відносно .game: знайдемо координати канвасу відносно .game
+  const gameRect = game.getBoundingClientRect();
+  const topOffset = rect.top - gameRect.top;
+  overlay.style.top = topOffset + 'px';
+  overlay.style.left = (rect.left - gameRect.left + rect.width/2) + 'px'; // використану translateX(-50%)
+}
+
+window.addEventListener('resize', positionPauseOverlay);
+canvas.addEventListener('load', positionPauseOverlay);
+
+/* Toggle pause */
+function togglePause(){
+  if(paused) resumeGame();
+  else pauseGame();
+}
+
+function pauseGame(){
+  if(paused) return;
+  paused = true;
+  clearInterval(interval);
+  // показати overlay прямо над canvas
+  positionPauseOverlay();
+  pauseOverlay.style.display = 'flex';
+  pauseOverlay.style.alignItems = 'center';
+  pauseOverlay.style.justifyContent = 'center';
+  // accessibility: focus на Continue
+  continueBtn.focus();
+}
+
+function resumeGame(){
+  if(!paused) return;
+  paused = false;
+  // перезапуск інтервалу
+  clearInterval(interval);
+  interval = setInterval(updateGame, 200 / speed);
+  pauseOverlay.style.display = 'none';
+}
+
+/* Вихід у меню (Exit) */
+function exitToMenu(){
+  // приховуємо overlay, зупиняємо гру і повертаємось у меню
+  paused = false;
+  clearInterval(interval);
+  pauseOverlay.style.display = 'none';
+  if (score > bestScore) {
+    bestScore = score;
+    localStorage.setItem('snakeBestScore', bestScore);
+    bestScoreEl.innerText = bestScore;
+  }
+
+  game.style.display = 'none';
+  menu.style.display = 'block';
+}
+
+/* кнопки overlay */
+continueBtn.addEventListener('click', resumeGame);
+exitBtn.addEventListener('click', exitToMenu);
+
+/* мобільна кнопка */
+mobilePauseBtn.addEventListener('click', togglePause);
+
+/* --- Основна ігрова логіка --- */
 function runGame(){
+  // ініціалізація
   snake=[{x:Math.floor(gridCount/2),y:Math.floor(gridCount/2)}];
   direction="RIGHT"; score=0; scoreEl.innerText=score;
   generateApples();
   clearInterval(interval);
   interval=setInterval(updateGame,200/speed);
-  document.addEventListener("keydown",changeDirection);
+  // додаємо прослуховувачі один раз глобально (не дублюємо)
+  if(!window._snakeControlsInit){
+    document.addEventListener("keydown", globalKeyHandler);
+    window._snakeControlsInit = true;
+  }
+  // позиціюємо overlay
+  setTimeout(positionPauseOverlay, 50);
+}
+
+function globalKeyHandler(e){
+  // якщо фокус на input/select — не реагуємо на пробіл для паузи
+  const tag = document.activeElement.tagName.toLowerCase();
+  if(tag === 'input' || tag === 'select' || tag === 'textarea') {
+    // allow using keys there normally
+  } else {
+    // пробіл — пауза / резюме
+    if(e.code === 'Space'){
+      e.preventDefault();
+      togglePause();
+      return;
+    }
+    // клавіші WASD для напрямку (перенесено сюди)
+    changeDirection(e);
+  }
 }
 
 function updateGame(){
+  if(paused) return; // додаткова охорона
   let head={...snake[0]};
   if(direction==="UP") head.y--;
   if(direction==="DOWN") head.y++;
@@ -413,11 +623,21 @@ function gameOverScreen(){
     showPopup(`Achievement Unlocked! 🏆<br>First loss💀`);
   }
 }
+
 /* --- Controls --- */
 function changeDirection(e){
-  const keys={"W":"UP","A":"LEFT","S":"DOWN","D":"RIGHT"};
-  if(keys[e.key.toUpperCase()]){
-    let newDir=keys[e.key.toUpperCase()];
+  // Якщо передано об'єкт події клавіатури — обробити WASD та стрілки
+  const key = (typeof e === 'string') ? e : (e.key || e.code || '').toUpperCase();
+  const map = {
+    'W':"UP",'A':"LEFT",'S':"DOWN",'D':"RIGHT",
+    'ARROWUP':"UP",'ARROWLEFT':"LEFT",'ARROWDOWN':"DOWN",'ARROWRIGHT':"RIGHT",
+    'KEYW':"UP",'KEYA':"LEFT",'KEYS':"DOWN",'KEYD':"RIGHT"
+  };
+  let k = key;
+  // якщо подія - об'єкт, використаємо letter
+  if(typeof e !== 'string' && e.key) k = e.key.toUpperCase();
+  if(map[k]){
+    let newDir = map[k];
     if((direction==="UP"&&newDir==="DOWN")||(direction==="DOWN"&&newDir==="UP")||(direction==="LEFT"&&newDir==="RIGHT")||(direction==="RIGHT"&&newDir==="LEFT")) return;
     direction=newDir;
   }
@@ -502,11 +722,28 @@ function resetProgress(){
 /* --- What's New modal --- */
 document.getElementById("whatsNewBtn").onclick=()=>{ document.getElementById("whatsNewModal").style.display="flex"; };
 document.getElementById("closeModal").onclick=()=>{ document.getElementById("whatsNewModal").style.display="none"; };
+
+/* --- What's New badge logic --- */
+const CURRENT_VERSION = "2.1.2"; // ← КОЛИ ОНОВИШ КОД — ЗМІНЮЙ ЦЕ
+
+const whatsBadge = document.getElementById("whatsBadge");
+const savedVersion = localStorage.getItem("whatsNewSeen");
+
+// якщо користувач не бачив цю версію → показуємо "1"
+if (savedVersion !== CURRENT_VERSION) {
+  whatsBadge.style.display = "inline-flex";
+} else {
+  whatsBadge.style.display = "none";
+}
+
+// коли відкривається вікно "What's New?"
+document.getElementById("whatsNewBtn").addEventListener("click", () => {
+  localStorage.setItem("whatsNewSeen", CURRENT_VERSION);
+  whatsBadge.style.display = "none";
+});
 </script>
 
   <!-- 🎵 Підключаємо музичний плеєр -->
 <script src="player.js"></script>
 </body>
 </html>
-
-
