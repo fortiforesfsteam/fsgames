@@ -5,9 +5,12 @@ const playlist = [
   { title: "I & Me", src: "music/I & Me.mp3" },
   { title: "I Told You", src: "music/I Told You.mp3" },
   { title: "Warm", src: "music/Warm.mp3" },
-  { title: "TornNament", src: "music/TornNament.mp3" },
+  { title: "Sunflower", src: "music/Sunflower.mp3" },
   { title: "Dead By Sunrise - Too Late", src: "music/Dead By Sunrise - Too Late.mp3" },
   { title: "Dead By Sunrise - Let Down", src: "music/Dead By Sunrise - Let Down.mp3" },
+  { title: "Chinatown Blues - ODDEEO", src: "music/Chinatown Blues - ODDEEO.mp3" },
+  { title: "Powfu, beabadoobee - death bed", src: "music/Powfu, beabadoobee - death bed.mp3" },
+  { title: "Powfu, Daniel Saint, Chill Sebs - death bed, Pt. 2", src: "music/Powfu, Daniel Saint, Chill Sebs - death bed, Pt. 2.mp3" },
 ];
 
 
@@ -204,5 +207,3 @@ function startMusic() {
 
 // слухаємо будь-який клік на сторінці
 window.addEventListener("click", startMusic);
-
-
