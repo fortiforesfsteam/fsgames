@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Snake Game</title>
   <style>
@@ -28,6 +28,8 @@
       border-radius: 15px;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
       position: relative;
+      width: 100%;
+      max-width: 560px;
     }
     .menu, .settings, .game-over { display: none; }
     .menu { display: block; }
@@ -59,7 +61,7 @@
     button:hover { background-color: #ddd; transform: scale(1.05); }
 
     .info-text {
-      margin-top: 40px;
+      margin-top: 24px;
       font-size: 14px;
       opacity: 0.8;
       white-space: nowrap;
@@ -122,13 +124,11 @@
       user-select: none;
     }
 
-    /* показувати кнопку сильно помітно лише на touch-пристроях / малих екранах */
     @media (min-width: 601px) {
-      /* ховати на десктопі (але можна показувати за бажанням) */
       .mobile-pause-btn { display: none; }
     }
 
-    /* --- Achievements --- */
+    /* Achievements */
     #achievementsModal {
       display: none;
       position: fixed;
@@ -148,16 +148,9 @@
       box-shadow: 0 0 20px #00ff00;
       text-align: left;
     }
-    .achievement {
-      margin: 8px 0;
-      padding: 8px;
-      border-radius: 8px;
-      transition: 0.3s;
-    }
-    .achievement.locked {
-      opacity: 0.3;
-      filter: grayscale(1);
-    }
+    .achievement { margin: 8px 0; padding: 8px; border-radius: 8px; transition: 0.3s; }
+    .achievement.locked { opacity: 0.3; filter: grayscale(1); }
+
     .popup {
       position: fixed;
       top: 20px;
@@ -173,721 +166,656 @@
       transition: opacity 0.5s, transform 0.5s;
       z-index: 300;
     }
-    .popup.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    @keyframes blink {
-      0%, 50% { opacity: 1; }
-      50.1%, 100% { opacity: 0.2; }
+    .popup.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @keyframes blink { 0%,50%{opacity:1;}50.1%,100%{opacity:0.2;} }
+
+    /* Leaderboard panel small responsive tweak */
+    @media (max-width: 520px) {
+      .content { padding: 18px; }
     }
   </style>
 </head>
 <body>
-<div class="content">
-  <div id="menu" class="menu">
-    <h1>Snake Game</h1>
-    <p>Best Score: <span id="bestScore">0</span></p>
-    <div id="nameBox" style="
-    margin: 14px 0;
-    display: flex;
-    justify-content: center;
-">
-    <input id="playerNameInput" 
-        type="text" 
-        maxlength="12"
-        placeholder="Enter your name"
-        style="
-            padding: 8px 12px;
-            width: 180px;
-            border-radius: 10px;
-            border: 2px solid #00ff00;
-            background: rgba(0,0,0,0.6);
-            color: #00ff00;
-            font-size: 16px;
-            text-align: center;
-            outline: none;
-            font-family: Segoe UI;
-        ">
-</div>
-    <button onclick="startGame()">Play</button>
-    <button onclick="openSettings()">Setting</button>
-    <br>
-    <button onclick="openAchievements()" style="font-size:14px; background:#00c800;">Achievements 🏆</button>
-    <br>
-    <button onclick="resetProgress()" style="font-size:13px; background:none; color:#ff4444; text-decoration:underline;">↺ Reset progress</button>
+  <div class="content">
+    <div id="menu" class="menu">
+      <h1>Snake Game</h1>
+      <p>Best Score: <span id="bestScore">0</span></p>
 
-    <div class="info-text">
-  <div style="display:inline-flex; align-items:center; gap:6px;">
-    <button id="whatsNewBtn"
-      style="color:#00ffff; font-size:14px; font-weight:600;
-             text-decoration:underline; background:none; border:none;
-             cursor:pointer; margin-bottom:4px;">
-      What's New?
-    </button>
-    <span id="whatsBadge"
-      style="
-        display:none;
-        width:16px;
-        height:16px;
-        background:red;
-        color:white;
-        border-radius:50%;
-        font-size:11px;
-        font-weight:bold;
-        align-items:center;
-        justify-content:center;
-        display:flex;
-        animation:blink 1s infinite;
-      ">
-      1
-    </span>
-  </div>
-  <br>
-  It's better to play on PC!<br>
-  Controls: WASD and Swipe — Pause: Space / ▐▐ (on phone)<br>
-  Ver 2.1.3 BETA!
-</div>
-
-    <!-- What's New Modal -->
-    <div id="whatsNewModal" 
-      style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
-             justify-content: center; align-items: center; z-index: 100;">
-      <div style="background: #111; color: white; border-radius: 15px; border: 2px solid #00ffff;
-                  padding: 20px; width: 300px; text-align: center; box-shadow: 0 0 20px #00ffff;">
-        <h2 style="color: #00ffff; margin-bottom: 10px;">What's New? ✨</h2>
-        <ul style="text-align: left; font-size: 14px; list-style: none; padding-left: 10px;">
-          <li>Ver <b>2.1.3 BETA!</b></li>
-          <li>Testing leader boards</li>
-          
-          <li style="margin-top:10px;">Ver <b>2.1.2💚</b></li>
-          <li>⏸ <b>Added game pause</li>
-          <li>🎵 <b>Added four tracks and removed one track</li>
-          <li>⚙ <b>Various small updates</li>
-        
-          
-          <li style="margin-top:10px;">Ver <b>2.0.9</b></li>
-          <li>💾 <b>Added save settings</li>                       
-        </ul>
-        <button id="closeModal" 
-          style="margin-top: 15px; background: #00ffff; color: black; font-weight: bold; 
-                 border: none; padding: 6px 12px; border-radius: 10px; cursor: pointer;">
-          Close
-        </button>
+      <!-- Поле ім'я — між Best Score і кнопками -->
+      <div id="nameBox" style="margin: 14px 0; display:flex; justify-content:center;">
+        <input id="playerNameInput"
+               type="text"
+               maxlength="12"
+               placeholder="Enter your name"
+               aria-label="Player name"
+               style="padding:8px 12px; width:180px; border-radius:10px; border:2px solid #00ff00; background:rgba(0,0,0,0.6); color:#00ff00; font-size:16px; text-align:center; outline:none; font-family: Segoe UI;">
       </div>
-    </div>
-  </div>
 
-  <div id="settings" class="settings">
-    <h2>Settings</h2>
-    <label>Snake speed: <span id="speedLabel">(X1)</span></label>
-    <input type="range" id="speed" min="0.25" max="2" step="0.25" value="1" onchange="updateSpeed()" />
-    <br />
-    <label>The color of the Snake:</label>
-    <select id="snakeColor">
-      <option value="green" selected>Green</option>
-      <option value="white">White</option>
-      <option value="blue">Blue</option>
-      <option value="yellow">Yellow</option>
-      <option value="orange">Orange</option>
-      <option value="purple">Purple</option>
-      <option value="pink">Pink</option>
-    </select>
-    <br />
-    <label>Spawn Apple:</label>
-    <select id="appleCount" onchange="updateAppleCount()">
-      <option value="1" selected>1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-      <option value="6">6</option>
-      <option value="7">7</option>
-      <option value="8">8</option>
-      <option value="9">9</option>
-      <option value="10">10</option>
-    </select>
-    <br />
-    <label>Field size:</label>
-    <select id="fieldSize" onchange="updateFieldSize()">
-      <option value="small" selected>Small</option>
-      <option value="medium">Medium</option>
-      <option value="large">Large</option>
-    </select>
-    <br />
-    <button onclick="closeSettings()">Back</button>
-  </div>
+      <div>
+        <button onclick="startGame()">Play</button>
+        <button onclick="openSettings()">Setting</button>
+      </div>
 
-  <div id="game" class="game">
-    <!-- мобільна кнопка паузи (правий верхній кут) -->
-    <div id="mobilePauseBtn" class="mobile-pause-btn" title="Pause">▐▐</div>
+      <div>
+        <button onclick="openAchievements()" style="font-size:14px; background:#00c800;">Achievements 🏆</button>
+      </div>
 
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-    <p>Score: <span id="score">0</span></p>
+      <div>
+        <button onclick="resetProgress()" style="font-size:13px; background:none; color:#ff4444; text-decoration:underline;">↺ Reset progress</button>
+      </div>
 
-    <!-- Overlay, що затемнює лише поле гри -->
-    <div id="pauseOverlay" class="pause-overlay">
-      <div class="backdrop"></div>
-      <div class="window">
-        <h3>Paused</h3>
-        <div style="margin-top:8px;">
-          <button id="continueBtn">Continue</button>
-          <button id="exitBtn" style="background:#ff6666;color:white;">Exit</button>
+      <div class="info-text">
+        <div style="display:inline-flex; align-items:center; gap:6px;">
+          <button id="whatsNewBtn"
+                  style="color:#00ffff; font-size:14px; font-weight:600; text-decoration:underline; background:none; border:none; cursor:pointer; margin-bottom:4px;">
+            What's New?
+          </button>
+          <span id="whatsBadge" style="display:none; width:16px; height:16px; background:red; color:white; border-radius:50%; font-size:11px; font-weight:bold; align-items:center; justify-content:center; display:flex; animation:blink 1s infinite;">1</span>
         </div>
-        <p style="font-size:12px; opacity:0.8; margin-top:8px;">Press Space to resume</p>
+        <br>
+        It's better to play on PC!<br>
+        Controls: WASD and Swipe — Pause: Space / ▐▐ (on phone)<br>
+        Ver 2.1.5 BETA!
       </div>
+
+      <!-- What's New Modal -->
+      <div id="whatsNewModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:100;">
+        <div style="background:#111; color:white; border-radius:15px; border:2px solid #00ffff; padding:20px; width:300px; text-align:center; box-shadow:0 0 20px #00ffff;">
+          <h2 style="color:#00ffff; margin-bottom:10px;">What's New? ✨</h2>
+          <ul style="text-align:left; font-size:14px; list-style:none; padding-left:10px;">
+            <li>Ver <b>2.1.3 - 2.1.5 BETA!!!</b></li>
+            <li>Testing leader boards📔</li>
+            <li style="margin-top:10px;">Ver <b>2.1.2💚</b></li>
+            <li>⏸ <b>Added game pause</b></li>
+            <li>🎵 <b>Added four tracks and removed one track</b></li>
+            <li>⚙ <b>Various small updates</b></li>
+            <li style="margin-top:10px;">Ver <b>2.0.9</b></li>
+            <li>💾 <b>Added save settings</b></li>
+          </ul>
+          <button id="closeModal" style="margin-top:15px; background:#00ffff; color:black; font-weight:bold; border:none; padding:6px 12px; border-radius:10px; cursor:pointer;">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="settings" class="settings">
+      <h2>Settings</h2>
+      <label>Snake speed: <span id="speedLabel">(X1)</span></label>
+      <input type="range" id="speed" min="0.25" max="2" step="0.25" value="1" onchange="updateSpeed()" />
+      <br />
+      <label>The color of the Snake:</label>
+      <select id="snakeColor">
+        <option value="green" selected>Green</option>
+        <option value="white">White</option>
+        <option value="blue">Blue</option>
+        <option value="yellow">Yellow</option>
+        <option value="orange">Orange</option>
+        <option value="purple">Purple</option>
+        <option value="pink">Pink</option>
+      </select>
+      <br />
+      <label>Spawn Apple:</label>
+      <select id="appleCount" onchange="updateAppleCount()">
+        <option value="1" selected>1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+      </select>
+      <br />
+      <label>Field size:</label>
+      <select id="fieldSize" onchange="updateFieldSize()">
+        <option value="small" selected>Small</option>
+        <option value="medium">Medium</option>
+        <option value="large">Large</option>
+      </select>
+      <br />
+      <button onclick="closeSettings()">Back</button>
+    </div>
+
+    <div id="game" class="game">
+      <div id="mobilePauseBtn" class="mobile-pause-btn" title="Pause">▐▐</div>
+      <canvas id="gameCanvas" width="400" height="400"></canvas>
+      <p>Score: <span id="score">0</span></p>
+
+      <div id="pauseOverlay" class="pause-overlay">
+        <div class="backdrop"></div>
+        <div class="window">
+          <h3>Paused</h3>
+          <div style="margin-top:8px;">
+            <button id="continueBtn">Continue</button>
+            <button id="exitBtn" style="background:#ff6666;color:white;">Exit</button>
+          </div>
+          <p style="font-size:12px; opacity:0.8; margin-top:8px;">Press Space to resume</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="gameOver" class="game-over">
+      <h2>Game Over!</h2>
+      <p>Score: <span id="finalScore">0</span></p>
+      <button onclick="startGame()">Try Again</button>
+      <button onclick="goToMenu()">Back</button>
     </div>
   </div>
 
-  <div id="gameOver" class="game-over">
-    <h2>Game Over!</h2>
-    <p>Score: <span id="finalScore">0</span></p>
-    <button onclick="startGame()">Try Again</button>
-    <button onclick="goToMenu()">Back</button>
+  <!-- Achievements Modal -->
+  <div id="achievementsModal">
+    <div class="window">
+      <h2 style="color:#00ff00;">Achievements 🏆</h2>
+      <div id="achievementList"></div>
+      <button onclick="closeAchievements()" style="margin-top:10px;">Close</button>
+    </div>
   </div>
-</div>
 
-<!-- Achievements Modal -->
-<div id="achievementsModal">
-  <div class="window">
-    <h2 style="color:#00ff00;">Achievements 🏆</h2>
-    <div id="achievementList"></div>
-    <button onclick="closeAchievements()" style="margin-top:10px;">Close</button>
-  </div>
-</div>
+  <div id="popup" class="popup"></div>
 
-<div id="popup" class="popup"></div>
+  <!-- ---- Основний скрипт гри (без Firebase) ---- -->
+  <script>
+    // Елементи
+    let menu = document.getElementById("menu"),
+        settings = document.getElementById("settings"),
+        game = document.getElementById("game"),
+        gameOver = document.getElementById("gameOver"),
+        canvas = document.getElementById("gameCanvas"),
+        ctx = canvas.getContext("2d"),
+        scoreEl = document.getElementById("score"),
+        finalScoreEl = document.getElementById("finalScore"),
+        bestScoreEl = document.getElementById("bestScore");
 
-<script>
-let menu=document.getElementById("menu"),
-    settings=document.getElementById("settings"),
-    game=document.getElementById("game"),
-    gameOver=document.getElementById("gameOver"),
-    canvas=document.getElementById("gameCanvas"),
-    ctx=canvas.getContext("2d"),
-    scoreEl=document.getElementById("score"),
-    finalScoreEl=document.getElementById("finalScore"),
-    bestScoreEl=document.getElementById("bestScore");
-
-let snakeColor="green", speed=1, snake, apples, direction, score, interval;
-let appleCount=1, fieldSize="small", gridCount=20;
-let bestScore=localStorage.getItem('snakeBestScore')||0;
-bestScoreEl.innerText=bestScore;
-
-const pauseOverlay = document.getElementById("pauseOverlay");
-const mobilePauseBtn = document.getElementById("mobilePauseBtn");
-const continueBtn = document.getElementById("continueBtn");
-const exitBtn = document.getElementById("exitBtn");
-
-let paused = false;
-
-/* --- Завантаження збережених налаштувань --- */
-const savedSettings = JSON.parse(localStorage.getItem('snakeSettings') || '{}');
-if(savedSettings.snakeColor) document.getElementById("snakeColor").value = savedSettings.snakeColor;
-if(savedSettings.speed){
-  document.getElementById("speed").value = savedSettings.speed;
-  speed = parseFloat(savedSettings.speed);
-  updateSpeed();
-}
-if(savedSettings.appleCount){
-  document.getElementById("appleCount").value = savedSettings.appleCount;
-  appleCount = parseInt(savedSettings.appleCount);
-}
-if(savedSettings.fieldSize){
-  document.getElementById("fieldSize").value = savedSettings.fieldSize;
-  fieldSize = savedSettings.fieldSize;
-  updateFieldSize();
-}
-
-/* --- Збереження налаштувань --- */
-function saveSettings(){
-  const settingsData = {
-    snakeColor: document.getElementById("snakeColor").value,
-    speed: document.getElementById("speed").value,
-    appleCount: document.getElementById("appleCount").value,
-    fieldSize: document.getElementById("fieldSize").value
-  };
-  localStorage.setItem('snakeSettings', JSON.stringify(settingsData));
-}
-
-document.getElementById("snakeColor").addEventListener("change", saveSettings);
-
-function openSettings(){ menu.style.display="none"; settings.style.display="block"; }
-function closeSettings(){ settings.style.display="none"; menu.style.display="block"; }
-
-function updateSpeed(){
-  speed=parseFloat(document.getElementById("speed").value);
-  const labels={"0.25":"X0.25","0.5":"X0.5","0.75":"X0.75","1":"X1","1.25":"X1.25","1.5":"X1.5","1.75":"X1.75","2":"X2"};
-  document.getElementById("speedLabel").innerText=`(${labels[speed]||'X1'})`;
-  saveSettings();
-}
-
-function updateAppleCount(){
-  appleCount=parseInt(document.getElementById("appleCount").value);
-  saveSettings();
-}
-function updateFieldSize(){
-  fieldSize=document.getElementById("fieldSize").value;
-  if(fieldSize==="small") gridCount=20;
-  else if(fieldSize==="medium") gridCount=30;
-  else if(fieldSize==="large") gridCount=40;
-  saveSettings();
-}
-
-function generateApples(){
-  apples=[];
-  while(apples.length<appleCount){
-    let newApple;
-    do{ newApple={x:Math.floor(Math.random()*gridCount),y:Math.floor(Math.random()*gridCount)}; }
-    while(snake.some(p=>p.x===newApple.x&&p.y===newApple.y)||apples.some(a=>a.x===newApple.x&&a.y===newApple.y));
-    apples.push(newApple);
-  }
-}
-
-function startGame(){
-  menu.style.display="none"; gameOver.style.display="none"; game.style.display="block";
-  snakeColor=document.getElementById("snakeColor").value;
-  // позиціонування overlay над самим canvas: підганяємо розміри і позицію
-  positionPauseOverlay();
-  runGame();
-}
-function goToMenu(){ gameOver.style.display="none"; menu.style.display="block"; }
-
-/* --- Pause / Resume / Exit logic --- */
-function positionPauseOverlay(){
-  // підганяємо overlay розміром і позицією над canvas
-  const rect = canvas.getBoundingClientRect();
-  // встановлюємо стилі так, щоб overlay розміщувався точно над канвасом всередині .game
-  const overlay = pauseOverlay;
-  overlay.style.display = 'none';
-  overlay.style.width = rect.width + 'px';
-  overlay.style.height = rect.height + 'px';
-  // top відносно .game: знайдемо координати канвасу відносно .game
-  const gameRect = game.getBoundingClientRect();
-  const topOffset = rect.top - gameRect.top;
-  overlay.style.top = topOffset + 'px';
-  overlay.style.left = (rect.left - gameRect.left + rect.width/2) + 'px'; // використану translateX(-50%)
-}
-
-window.addEventListener('resize', positionPauseOverlay);
-canvas.addEventListener('load', positionPauseOverlay);
-
-/* Toggle pause */
-function togglePause(){
-  if(paused) resumeGame();
-  else pauseGame();
-}
-
-function pauseGame(){
-  if(paused) return;
-  paused = true;
-  clearInterval(interval);
-  // показати overlay прямо над canvas
-  positionPauseOverlay();
-  pauseOverlay.style.display = 'flex';
-  pauseOverlay.style.alignItems = 'center';
-  pauseOverlay.style.justifyContent = 'center';
-  // accessibility: focus на Continue
-  continueBtn.focus();
-}
-
-function resumeGame(){
-  if(!paused) return;
-  paused = false;
-  // перезапуск інтервалу
-  clearInterval(interval);
-  interval = setInterval(updateGame, 200 / speed);
-  pauseOverlay.style.display = 'none';
-}
-
-/* Вихід у меню (Exit) */
-function exitToMenu(){
-  // приховуємо overlay, зупиняємо гру і повертаємось у меню
-  paused = false;
-  clearInterval(interval);
-  pauseOverlay.style.display = 'none';
-  if (score > bestScore) {
-    bestScore = score;
-    localStorage.setItem('snakeBestScore', bestScore);
+    // Параметри гри
+    let snakeColor = "green", speed = 1, snake, apples, direction, score, interval;
+    let appleCount = 1, fieldSize = "small", gridCount = 20;
+    let bestScore = Number(localStorage.getItem('snakeBestScore') || 0);
     bestScoreEl.innerText = bestScore;
-  }
 
-  game.style.display = 'none';
-  menu.style.display = 'block';
-}
+    const pauseOverlay = document.getElementById("pauseOverlay");
+    const mobilePauseBtn = document.getElementById("mobilePauseBtn");
+    const continueBtn = document.getElementById("continueBtn");
+    const exitBtn = document.getElementById("exitBtn");
 
-/* кнопки overlay */
-continueBtn.addEventListener('click', resumeGame);
-exitBtn.addEventListener('click', exitToMenu);
+    let paused = false;
 
-/* мобільна кнопка */
-mobilePauseBtn.addEventListener('click', togglePause);
-
-/* --- Основна ігрова логіка --- */
-function runGame(){
-  // ініціалізація
-  snake=[{x:Math.floor(gridCount/2),y:Math.floor(gridCount/2)}];
-  direction="RIGHT"; score=0; scoreEl.innerText=score;
-  generateApples();
-  clearInterval(interval);
-  interval=setInterval(updateGame,200/speed);
-  // додаємо прослуховувачі один раз глобально (не дублюємо)
-  if(!window._snakeControlsInit){
-    document.addEventListener("keydown", globalKeyHandler);
-    window._snakeControlsInit = true;
-  }
-  // позиціюємо overlay
-  setTimeout(positionPauseOverlay, 50);
-}
-
-function globalKeyHandler(e){
-  // якщо фокус на input/select — не реагуємо на пробіл для паузи
-  const tag = document.activeElement.tagName.toLowerCase();
-  if(tag === 'input' || tag === 'select' || tag === 'textarea') {
-    // allow using keys there normally
-  } else {
-    // пробіл — пауза / резюме
-    if(e.code === 'Space'){
-      e.preventDefault();
-      togglePause();
-      return;
+    // Збереження налаштувань
+    const savedSettings = JSON.parse(localStorage.getItem('snakeSettings') || '{}');
+    if (savedSettings.snakeColor) document.getElementById("snakeColor").value = savedSettings.snakeColor;
+    if (savedSettings.speed) {
+      document.getElementById("speed").value = savedSettings.speed;
+      speed = parseFloat(savedSettings.speed);
+      updateSpeed();
     }
-    // клавіші WASD для напрямку (перенесено сюди)
-    changeDirection(e);
-  }
-}
-
-function updateGame(){
-  if(paused) return; // додаткова охорона
-  let head={...snake[0]};
-  if(direction==="UP") head.y--;
-  if(direction==="DOWN") head.y++;
-  if(direction==="LEFT") head.x--;
-  if(direction==="RIGHT") head.x++;
-
-  snake.unshift(head);
-
-  for(let i=1;i<snake.length;i++){ if(snake[i].x===head.x&&snake[i].y===head.y){ gameOverScreen(); return; } }
-
-  let ateApple=false;
-  apples.forEach((apple,i)=>{
-    if(head.x===apple.x&&head.y===apple.y){
-      score++; scoreEl.innerText=score; apples.splice(i,1); ateApple=true;
-      checkAchievements();
+    if (savedSettings.appleCount) {
+      document.getElementById("appleCount").value = savedSettings.appleCount;
+      appleCount = parseInt(savedSettings.appleCount);
     }
-  });
-
-  while(apples.length<appleCount){
-    let newApple;
-    do{ newApple={x:Math.floor(Math.random()*gridCount),y:Math.floor(Math.random()*gridCount)}; }
-    while(snake.some(p=>p.x===newApple.x&&p.y===newApple.y)||apples.some(a=>a.x===newApple.x&&a.y===newApple.y));
-    apples.push(newApple);
-  }
-
-  if(!ateApple) snake.pop();
-  if(head.x<0||head.x>=gridCount||head.y<0||head.y>=gridCount){ gameOverScreen(); return; }
-
-  drawGame();
-}
-
-function drawGame(){
-  let cellSize=canvas.width/gridCount;
-  for(let y=0;y<gridCount;y++){
-    for(let x=0;x<gridCount;x++){
-      ctx.fillStyle=(x+y)%2===0?"black":"#212121";
-      ctx.fillRect(x*cellSize,y*cellSize,cellSize,cellSize);
+    if (savedSettings.fieldSize) {
+      document.getElementById("fieldSize").value = savedSettings.fieldSize;
+      fieldSize = savedSettings.fieldSize;
+      updateFieldSize();
     }
-  }
 
-  snake.forEach((part,index)=>{
-    ctx.shadowBlur=15; ctx.shadowColor=snakeColor;
-    ctx.fillStyle=snakeColor;
-    ctx.fillRect(part.x*cellSize,part.y*cellSize,cellSize,cellSize);
-    ctx.shadowBlur=0; ctx.shadowColor="transparent";
+    function saveSettings(){
+      const settingsData = {
+        snakeColor: document.getElementById("snakeColor").value,
+        speed: document.getElementById("speed").value,
+        appleCount: document.getElementById("appleCount").value,
+        fieldSize: document.getElementById("fieldSize").value
+      };
+      localStorage.setItem('snakeSettings', JSON.stringify(settingsData));
+    }
+    document.getElementById("snakeColor").addEventListener("change", saveSettings);
 
-    if(index===0){
-      ctx.fillStyle="black";
-      let cx=part.x*cellSize, cy=part.y*cellSize;
-      if(direction==="UP"||direction==="DOWN"){
-        ctx.beginPath(); ctx.arc(cx+cellSize*0.25,cy+(direction==="UP"?cellSize*0.25:cellSize*0.75),2,0,Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx+cellSize*0.75,cy+(direction==="UP"?cellSize*0.25:cellSize*0.75),2,0,Math.PI*2); ctx.fill();
-      } else {
-        ctx.beginPath(); ctx.arc(cx+(direction==="LEFT"?cellSize*0.25:cellSize*0.75),cy+cellSize*0.25,2,0,Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx+(direction==="LEFT"?cellSize*0.25:cellSize*0.75),cy+cellSize*0.75,2,0,Math.PI*2); ctx.fill();
+    function openSettings(){ menu.style.display="none"; settings.style.display="block"; }
+    function closeSettings(){ settings.style.display="none"; menu.style.display="block"; }
+
+    function updateSpeed(){
+      speed = parseFloat(document.getElementById("speed").value);
+      const labels = {"0.25":"X0.25","0.5":"X0.5","0.75":"X0.75","1":"X1","1.25":"X1.25","1.5":"X1.5","1.75":"X1.75","2":"X2"};
+      document.getElementById("speedLabel").innerText = `(${labels[speed]||'X1'})`;
+      saveSettings();
+    }
+
+    function updateAppleCount(){
+      appleCount = parseInt(document.getElementById("appleCount").value);
+      saveSettings();
+    }
+    function updateFieldSize(){
+      fieldSize = document.getElementById("fieldSize").value;
+      if(fieldSize==="small") gridCount=20;
+      else if(fieldSize==="medium") gridCount=30;
+      else if(fieldSize==="large") gridCount=40;
+      saveSettings();
+    }
+
+    function generateApples(){
+      apples = [];
+      while(apples.length < appleCount){
+        let newApple;
+        do { newApple = {x: Math.floor(Math.random()*gridCount), y: Math.floor(Math.random()*gridCount)}; }
+        while(snake.some(p=>p.x===newApple.x && p.y===newApple.y) || apples.some(a=>a.x===newApple.x && a.y===newApple.y));
+        apples.push(newApple);
       }
     }
-  });
 
-  apples.forEach(a=>{
-    ctx.beginPath(); ctx.fillStyle="red";
-    ctx.arc(a.x*cellSize+cellSize/2,a.y*cellSize+cellSize/2,cellSize/2,0,Math.PI*2);
-    ctx.fill();
-  });
-}
-
-// Функція gameOverScreen із відкриттям "First loss"
-function gameOverScreen(){
-  clearInterval(interval);
-  game.style.display = "none";
-  gameOver.style.display = "block";
-  finalScoreEl.innerText = score;
-  sendScore(score);
-
-  if(score > bestScore){
-    bestScore = score;
-    localStorage.setItem('snakeBestScore', bestScore);
-    bestScoreEl.innerText = bestScore;
-  }
-
-  // Відкриття досягнення "First loss" при першому програші
-  if(!unlocked.includes(2)){
-    unlocked.push(2);
-    localStorage.setItem('snakeAchievements', JSON.stringify(unlocked));
-    showPopup(`Achievement Unlocked! 🏆<br>First loss💀`);
-  }
-}
-
-/* --- Controls --- */
-function changeDirection(e){
-  // Якщо передано об'єкт події клавіатури — обробити WASD та стрілки
-  const key = (typeof e === 'string') ? e : (e.key || e.code || '').toUpperCase();
-  const map = {
-    'W':"UP",'A':"LEFT",'S':"DOWN",'D':"RIGHT",
-    'ARROWUP':"UP",'ARROWLEFT':"LEFT",'ARROWDOWN':"DOWN",'ARROWRIGHT':"RIGHT",
-    'KEYW':"UP",'KEYA':"LEFT",'KEYS':"DOWN",'KEYD':"RIGHT"
-  };
-  let k = key;
-  // якщо подія - об'єкт, використаємо letter
-  if(typeof e !== 'string' && e.key) k = e.key.toUpperCase();
-  if(map[k]){
-    let newDir = map[k];
-    if((direction==="UP"&&newDir==="DOWN")||(direction==="DOWN"&&newDir==="UP")||(direction==="LEFT"&&newDir==="RIGHT")||(direction==="RIGHT"&&newDir==="LEFT")) return;
-    direction=newDir;
-  }
-}
-
-/* --- Touch --- */
-let touchStartX=0,touchStartY=0,touchEndX=0,touchEndY=0;
-document.body.style.overflow="hidden";
-document.body.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
-canvas.addEventListener("touchstart",e=>{const t=e.touches[0]; touchStartX=t.clientX; touchStartY=t.clientY;},{passive:false});
-canvas.addEventListener("touchend",e=>{const t=e.changedTouches[0]; touchEndX=t.clientX; touchEndY=t.clientY; handleSwipe();},{passive:false});
-function handleSwipe(){
-  const diffX=touchEndX-touchStartX, diffY=touchEndY-touchStartY;
-  if(Math.abs(diffX)>Math.abs(diffY)){
-    if(diffX>30&&direction!=="LEFT") direction="RIGHT";
-    else if(diffX<-30&&direction!=="RIGHT") direction="LEFT";
-  } else {
-    if(diffY>30&&direction!=="UP") direction="DOWN";
-    else if(diffY<-30&&direction!=="DOWN") direction="UP";
-  }
-}
-
-/* --- Achievements --- */
-const achievements=[
-  {id:1, title:"✨Eat the first apple 🍎🐍", condition:1},
-  {id:2, title:"First loss💀", condition:"firstLoss"},
-  {id:3, title:"Eat twenty apples 🍎", condition:20},
-  {id:4, title:"Eat forty apples 🍎", condition:40},
-  {id:5, title:"Eat sixty apples 🍎", condition:60},
-  {id:6, title:"Eat eighty apples 🍎", condition:80},
-  {id:7, title:"Eat one hundred apples 🍎", condition:100},
-];
-let unlocked = JSON.parse(localStorage.getItem('snakeAchievements') || '[]');
-
-// Перевірка досягнень при їжі яблука
-function checkAchievements(){
-  achievements.forEach(a => {
-    if(typeof a.condition === "number" && score >= a.condition && !unlocked.includes(a.id)){
-      unlocked.push(a.id);
-      localStorage.setItem('snakeAchievements', JSON.stringify(unlocked));
-      showPopup(`Achievement Unlocked! 🏆<br>${a.title}`);
+    function startGame(){
+      menu.style.display="none"; gameOver.style.display="none"; game.style.display="block";
+      snakeColor = document.getElementById("snakeColor").value;
+      positionPauseOverlay();
+      runGame();
     }
-  });
-}
+    function goToMenu(){ gameOver.style.display="none"; menu.style.display="block"; }
 
-function showPopup(text){
-  const popup=document.getElementById("popup");
-  popup.innerHTML=text;
-  popup.classList.add("show");
-  setTimeout(()=>popup.classList.remove("show"),2500);
-}
+    function positionPauseOverlay(){
+      const rect = canvas.getBoundingClientRect();
+      const overlay = pauseOverlay;
+      overlay.style.display = 'none';
+      overlay.style.width = rect.width + 'px';
+      overlay.style.height = rect.height + 'px';
+      const gameRect = game.getBoundingClientRect();
+      const topOffset = rect.top - gameRect.top;
+      overlay.style.top = topOffset + 'px';
+      overlay.style.left = (rect.left - gameRect.left + rect.width/2) + 'px';
+    }
+    window.addEventListener('resize', positionPauseOverlay);
 
-function openAchievements(){
-  menu.style.display = "none";
-  const modal = document.getElementById("achievementsModal");
-  modal.style.display = "flex";
+    function togglePause(){ if(paused) resumeGame(); else pauseGame(); }
 
-  const list = document.getElementById("achievementList");
-  list.innerHTML = "";
+    function pauseGame(){
+      if(paused) return;
+      paused = true;
+      clearInterval(interval);
+      positionPauseOverlay();
+      pauseOverlay.style.display = 'flex';
+      pauseOverlay.style.alignItems = 'center';
+      pauseOverlay.style.justifyContent = 'center';
+      continueBtn.focus();
+    }
 
-  achievements.forEach(a => {
-    const div = document.createElement("div");
-    div.className = "achievement" + (unlocked.includes(a.id) ? "" : " locked");
-    div.innerHTML = a.title;
-    list.appendChild(div);
-  });
-}
+    function resumeGame(){
+      if(!paused) return;
+      paused = false;
+      clearInterval(interval);
+      interval = setInterval(updateGame, 200 / speed);
+      pauseOverlay.style.display = 'none';
+    }
 
-function closeAchievements(){
-  document.getElementById("achievementsModal").style.display="none";
-  menu.style.display="block";
-}
+    function exitToMenu(){
+      paused = false;
+      clearInterval(interval);
+      pauseOverlay.style.display = 'none';
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('snakeBestScore', bestScore);
+        bestScoreEl.innerText = bestScore;
+      }
+      game.style.display = 'none';
+      menu.style.display = 'block';
+    }
 
-function resetProgress(){
-  if(confirm("Reset all progress?")){
-    localStorage.removeItem('snakeAchievements');
-    localStorage.removeItem('snakeBestScore');
-    unlocked=[]; bestScore=0; bestScoreEl.innerText=0;
-  }
-}
+    continueBtn.addEventListener('click', resumeGame);
+    exitBtn.addEventListener('click', exitToMenu);
+    mobilePauseBtn.addEventListener('click', togglePause);
 
-/* --- What's New modal --- */
-document.getElementById("whatsNewBtn").onclick=()=>{ document.getElementById("whatsNewModal").style.display="flex"; };
-document.getElementById("closeModal").onclick=()=>{ document.getElementById("whatsNewModal").style.display="none"; };
+    function runGame(){
+      snake = [{x: Math.floor(gridCount/2), y: Math.floor(gridCount/2)}];
+      direction = "RIGHT"; score = 0; scoreEl.innerText = score;
+      generateApples();
+      clearInterval(interval);
+      interval = setInterval(updateGame, 200 / speed);
+      if(!window._snakeControlsInit){
+        document.addEventListener("keydown", globalKeyHandler);
+        window._snakeControlsInit = true;
+      }
+      setTimeout(positionPauseOverlay, 50);
+    }
 
-/* --- What's New badge logic --- */
-const CURRENT_VERSION = "2.1.3"; // ← КОЛИ ОНОВИШ КОД — ЗМІНЮЙ ЦЕ
+    function globalKeyHandler(e){
+      const tag = document.activeElement.tagName.toLowerCase();
+      if(tag === 'input' || tag === 'select' || tag === 'textarea') {
+        // пропускаємо якщо фокус на input
+      } else {
+        if(e.code === 'Space'){ e.preventDefault(); togglePause(); return; }
+        changeDirection(e);
+      }
+    }
 
-const whatsBadge = document.getElementById("whatsBadge");
-const savedVersion = localStorage.getItem("whatsNewSeen");
+    function updateGame(){
+      if(paused) return;
+      let head = {...snake[0]};
+      if(direction==="UP") head.y--;
+      if(direction==="DOWN") head.y++;
+      if(direction==="LEFT") head.x--;
+      if(direction==="RIGHT") head.x++;
+      snake.unshift(head);
 
-// якщо користувач не бачив цю версію → показуємо "1"
-if (savedVersion !== CURRENT_VERSION) {
-  whatsBadge.style.display = "inline-flex";
-} else {
-  whatsBadge.style.display = "none";
-}
+      for(let i=1;i<snake.length;i++){ if(snake[i].x===head.x && snake[i].y===head.y){ gameOverScreen(); return; } }
 
-// коли відкривається вікно "What's New?"
-document.getElementById("whatsNewBtn").addEventListener("click", () => {
-  localStorage.setItem("whatsNewSeen", CURRENT_VERSION);
-  whatsBadge.style.display = "none";
-});
-</script>
+      let ateApple = false;
+      apples.forEach((apple,i)=>{
+        if(head.x===apple.x && head.y===apple.y){
+          score++; scoreEl.innerText = score; apples.splice(i,1); ateApple = true;
+          checkAchievements();
+        }
+      });
 
-  <!-- 🎵 Підключаємо музичний плеєр -->
-<script src="player.js"></script>
+      while(apples.length < appleCount){
+        let newApple;
+        do { newApple = {x: Math.floor(Math.random()*gridCount), y: Math.floor(Math.random()*gridCount)}; }
+        while(snake.some(p=>p.x===newApple.x && p.y===newApple.y) || apples.some(a=>a.x===newApple.x && a.y===newApple.y));
+        apples.push(newApple);
+      }
 
-  <!-- === Firebase Leaderboard (Best Score per Player) === -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getDatabase, ref, set, get, query, orderByChild, limitToLast, onValue } 
-  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+      if(!ateApple) snake.pop();
+      if(head.x<0 || head.x>=gridCount || head.y<0 || head.y>=gridCount){ gameOverScreen(); return; }
 
-/* === 1. Firebase config === */
-const firebaseConfig = {
-  apiKey: "AIzaSyBFLCSFMOo3Km8gX7N5YLh1Rk1xbP73n2k",
-  authDomain: "fsgames-snake-game.firebaseapp.com",
-  databaseURL: "https://fsgames-snake-game-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "fsgames-snake-game",
-  storageBucket: "fsgames-snake-game.appspot.com",
-  messagingSenderId: "423889454890",
-  appId: "1:423889454890:web:0462353a54c1689039c053"
-};
+      drawGame();
+    }
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const lbRef = ref(db, "leaderboard");
+    function drawGame(){
+      let cellSize = canvas.width / gridCount;
+      for(let y=0;y<gridCount;y++){
+        for(let x=0;x<gridCount;x++){
+          ctx.fillStyle = (x+y)%2===0 ? "black" : "#212121";
+          ctx.fillRect(x*cellSize, y*cellSize, cellSize, cellSize);
+        }
+      }
 
-/* === 2. Створюємо панель === */
-const panel = document.createElement("div");
-Object.assign(panel.style, {
-  position: "fixed",
-  top: "0",
-  left: "-320px",
-  width: "300px",
-  height: "100vh",
-  background: "rgba(0,0,0,0.85)",
-  color: "white",
-  padding: "20px",
-  borderRight: "2px solid #00ff00",
-  overflowY: "auto",
-  transition: "left 0.35s ease",
-  zIndex: "99999",
-  fontFamily: "Segoe UI"
-});
-panel.innerHTML = `
-  <h2 style="color:#00ff00; text-align:center;">Leaderboard 🏆</h2>
-  <div id="lbList">Loading...</div>
-`;
-document.body.appendChild(panel);
+      snake.forEach((part,index)=>{
+        ctx.shadowBlur = 15; ctx.shadowColor = snakeColor;
+        ctx.fillStyle = snakeColor;
+        ctx.fillRect(part.x*cellSize, part.y*cellSize, cellSize, cellSize);
+        ctx.shadowBlur = 0; ctx.shadowColor = "transparent";
 
-/* === 3. Кнопка 🏆 === */
-const btn = document.createElement("div");
-btn.innerHTML = "🏆";
-Object.assign(btn.style, {
-  position: "fixed",
-  top: "50%",
-  left: "0",
-  transform: "translate(0, -50%)",
-  background: "#00ff00",
-  padding: "10px 14px",
-  borderRadius: "12px",
-  cursor: "pointer",
-  fontSize: "20px",
-  zIndex: "100000",
-  boxShadow: "0 0 12px #00ff00"
-});
-document.body.appendChild(btn);
+        if(index===0){
+          ctx.fillStyle = "black";
+          let cx = part.x*cellSize, cy = part.y*cellSize;
+          if(direction==="UP"||direction==="DOWN"){
+            ctx.beginPath(); ctx.arc(cx+cellSize*0.25, cy+(direction==="UP"?cellSize*0.25:cellSize*0.75), 2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx+cellSize*0.75, cy+(direction==="UP"?cellSize*0.25:cellSize*0.75), 2, 0, Math.PI*2); ctx.fill();
+          } else {
+            ctx.beginPath(); ctx.arc(cx+(direction==="LEFT"?cellSize*0.25:cellSize*0.75), cy+cellSize*0.25, 2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx+(direction==="LEFT"?cellSize*0.25:cellSize*0.75), cy+cellSize*0.75, 2, 0, Math.PI*2); ctx.fill();
+          }
+        }
+      });
 
-/* === 4. Логіка відкриття === */
-let isOpen = false;
-btn.onclick = () => {
-  isOpen = !isOpen;
-  panel.style.left = isOpen ? "0px" : "-300px";
-  if(isOpen) loadLeaderboard();
-};
+      apples.forEach(a=>{
+        ctx.beginPath(); ctx.fillStyle="red";
+        ctx.arc(a.x*cellSize + cellSize/2, a.y*cellSize + cellSize/2, cellSize/2, 0, Math.PI*2);
+        ctx.fill();
+      });
+    }
 
-/* === 5. Завантаження Leaderboard === */
-function loadLeaderboard(){
-  const list = document.getElementById("lbList");
-  list.innerHTML = "Loading...";
+    function gameOverScreen(){
+      clearInterval(interval);
+      game.style.display = "none";
+      gameOver.style.display = "block";
+      finalScoreEl.innerText = score;
 
-  const q = query(lbRef, orderByChild("score"), limitToLast(50));
-  onValue(q, snapshot => {
-    const arr = [];
-    snapshot.forEach(s => arr.push(s.val()));
-    arr.sort((a,b) => b.score - a.score);
+      // Надсилаємо результат у Firebase (глобальна функція визначена в модулі)
+      if (typeof window.sendScore === "function") {
+        window.sendScore(score);
+      } else {
+        console.warn("sendScore not ready yet");
+      }
 
-    list.innerHTML = arr.map((x, i) => `
-      <div style="padding:6px; border-bottom:1px solid #00ff00;">
-        <b>${i+1}.</b> ${x.name}
-        <span style="float:right;color:#00ff00">${x.score}</span>
-      </div>
-    `).join("");
-  });
-}
+      if(score > bestScore){
+        bestScore = score;
+        localStorage.setItem('snakeBestScore', bestScore);
+        bestScoreEl.innerText = bestScore;
+      }
 
-/* === 6. Надсилання рахунку === */
-window.sendScore = async function(score){
-  const name = localStorage.getItem("snakePlayerName") || "Player";
-  const playerRef = ref(db, `leaderboard/${name}`);
+      if(!unlocked.includes(2)){
+        unlocked.push(2);
+        localStorage.setItem('snakeAchievements', JSON.stringify(unlocked));
+        showPopup(`Achievement Unlocked! 🏆<br>First loss💀`);
+      }
+    }
 
-  // отримуємо попередній рекорд
-  const snapshot = await get(playerRef);
-  if(!snapshot.exists() || score > snapshot.val().score){
-    set(playerRef, {
-      name: name,
-      score: score,
-      time: Date.now()
+    // Controls
+    function changeDirection(e){
+      const key = (typeof e === 'string') ? e : (e.key || e.code || '').toUpperCase();
+      const map = {'W':"UP",'A':"LEFT",'S':"DOWN",'D':"RIGHT",'ARROWUP':"UP",'ARROWLEFT':"LEFT",'ARROWDOWN':"DOWN",'ARROWRIGHT':"RIGHT"};
+      let k = key;
+      if(typeof e !== 'string' && e.key) k = e.key.toUpperCase();
+      if(map[k]){
+        let newDir = map[k];
+        if((direction==="UP"&&newDir==="DOWN")||(direction==="DOWN"&&newDir==="UP")||(direction==="LEFT"&&newDir==="RIGHT")||(direction==="RIGHT"&&newDir==="LEFT")) return;
+        direction = newDir;
+      }
+    }
+
+    // Touch
+    let touchStartX=0,touchStartY=0,touchEndX=0,touchEndY=0;
+    document.body.style.overflow="hidden";
+    document.body.addEventListener("touchmove", e => e.preventDefault(), {passive:false});
+    canvas.addEventListener("touchstart", e => { const t=e.touches[0]; touchStartX=t.clientX; touchStartY=t.clientY; }, {passive:false});
+    canvas.addEventListener("touchend", e => { const t=e.changedTouches[0]; touchEndX=t.clientX; touchEndY=t.clientY; handleSwipe(); }, {passive:false});
+    function handleSwipe(){
+      const diffX = touchEndX - touchStartX, diffY = touchEndY - touchStartY;
+      if(Math.abs(diffX) > Math.abs(diffY)){
+        if(diffX > 30 && direction !== "LEFT") direction = "RIGHT";
+        else if(diffX < -30 && direction !== "RIGHT") direction = "LEFT";
+      } else {
+        if(diffY > 30 && direction !== "UP") direction = "DOWN";
+        else if(diffY < -30 && direction !== "DOWN") direction = "UP";
+      }
+    }
+
+    // Achievements
+    const achievements = [
+      {id:1, title:"✨Eat the first apple 🍎🐍", condition:1},
+      {id:2, title:"First loss💀", condition:"firstLoss"},
+      {id:3, title:"Eat twenty apples 🍎", condition:20},
+      {id:4, title:"Eat forty apples 🍎", condition:40},
+      {id:5, title:"Eat sixty apples 🍎", condition:60},
+      {id:6, title:"Eat eighty apples 🍎", condition:80},
+      {id:7, title:"Eat one hundred apples 🍎", condition:100},
+    ];
+    let unlocked = JSON.parse(localStorage.getItem('snakeAchievements') || '[]');
+
+    function checkAchievements(){
+      achievements.forEach(a => {
+        if(typeof a.condition === "number" && score >= a.condition && !unlocked.includes(a.id)){
+          unlocked.push(a.id);
+          localStorage.setItem('snakeAchievements', JSON.stringify(unlocked));
+          showPopup(`Achievement Unlocked! 🏆<br>${a.title}`);
+        }
+      });
+    }
+
+    function showPopup(text){
+      const popup = document.getElementById("popup");
+      popup.innerHTML = text;
+      popup.classList.add("show");
+      setTimeout(()=>popup.classList.remove("show"), 2500);
+    }
+
+    function openAchievements(){
+      menu.style.display = "none";
+      const modal = document.getElementById("achievementsModal");
+      modal.style.display = "flex";
+
+      const list = document.getElementById("achievementList");
+      list.innerHTML = "";
+
+      achievements.forEach(a => {
+        const div = document.createElement("div");
+        div.className = "achievement" + (unlocked.includes(a.id) ? "" : " locked");
+        div.innerHTML = a.title;
+        list.appendChild(div);
+      });
+    }
+
+    function closeAchievements(){
+      document.getElementById("achievementsModal").style.display="none";
+      menu.style.display="block";
+    }
+
+    function resetProgress(){
+      if(confirm("Reset all progress?")){
+        localStorage.removeItem('snakeAchievements');
+        localStorage.removeItem('snakeBestScore');
+        unlocked = []; bestScore = 0; bestScoreEl.innerText = 0;
+      }
+    }
+
+    // What's New
+    document.getElementById("whatsNewBtn").onclick = () => { document.getElementById("whatsNewModal").style.display="flex"; };
+    document.getElementById("closeModal").onclick = () => { document.getElementById("whatsNewModal").style.display="none"; };
+
+    const CURRENT_VERSION = "2.1.5";
+    const whatsBadge = document.getElementById("whatsBadge");
+    const savedVersion = localStorage.getItem("whatsNewSeen");
+    if (savedVersion !== CURRENT_VERSION) whatsBadge.style.display = "inline-flex"; else whatsBadge.style.display = "none";
+    document.getElementById("whatsNewBtn").addEventListener("click", () => { localStorage.setItem("whatsNewSeen", CURRENT_VERSION); whatsBadge.style.display = "none"; });
+
+  </script>
+
+  <!-- Плеєр музики (залишаю як був) -->
+  <script src="player.js"></script>
+
+  <!-- === Firebase Leaderboard (Best score per player) === -->
+  <script type="module">
+    // імпорт Firebase як ES-модуль (підходить для GitHub Pages)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, set, get, query, orderByChild, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+    // === Конфіг Firebase (твій) ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyBFLCSFMOo3Km8gX7N5YLh1Rk1xbP73n2k",
+      authDomain: "fsgames-snake-game.firebaseapp.com",
+      databaseURL: "https://fsgames-snake-game-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "fsgames-snake-game",
+      storageBucket: "fsgames-snake-game.firebasestorage.app",
+      messagingSenderId: "423889454890",
+      appId: "1:423889454890:web:0462353a54c1689039c053",
+      measurementId: "G-6X75R7QR11"
+    };
+
+    // Ініціалізація
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const rootRef = ref(db, "leaderboard");
+
+    // Створюємо панель Leaderboard (бічна)
+    const panel = document.createElement("div");
+    Object.assign(panel.style, {
+      position: "fixed",
+      top: "0",
+      left: "-320px",
+      width: "300px",
+      height: "100vh",
+      background: "rgba(0,0,0,0.95)",
+      color: "white",
+      padding: "16px",
+      borderRight: "2px solid #00ff00",
+      overflowY: "auto",
+      transition: "left 0.28s ease",
+      zIndex: "99999",
+      fontFamily: "Segoe UI",
     });
-  }
-};
-</script>
+    panel.innerHTML = `
+      <h2 style="color:#00ff00; text-align:center; margin-top:6px;">Leaderboard 🏆</h2>
+      <div id="lbList" style="margin-top:8px;">Loading...</div>
+      <div style="text-align:center; margin-top:12px;">
+        <button id="refreshLbBtn" style="padding:6px 10px; border-radius:8px; background:#00ff00; color:#000; border:none; cursor:pointer;">Refresh</button>
+      </div>
+      <div style="font-size:12px; opacity:0.7; margin-top:10px; text-align:center;">Top 50 — Best score per player</div>
+    `;
+    document.body.appendChild(panel);
 
-  <script>
-const input = document.getElementById("playerNameInput");
+    // Кнопка відкриття
+    const btn = document.createElement("div");
+    btn.innerHTML = "🏆";
+    Object.assign(btn.style, {
+      position: "fixed",
+      top: "50%",
+      left: "0",
+      transform: "translate(0, -50%)",
+      background: "#00ff00",
+      padding: "10px 14px",
+      borderRadius: "12px",
+      cursor: "pointer",
+      fontSize: "20px",
+      zIndex: "100000",
+      boxShadow: "0 0 12px #00ff00",
+    });
+    document.body.appendChild(btn);
 
-// Підставляємо збережене ім'я при завантаженні
-input.value = localStorage.getItem("snakePlayerName") || "";
+    let isOpen = false;
+    btn.addEventListener("click", () => {
+      isOpen = !isOpen;
+      panel.style.left = isOpen ? "0px" : "-320px";
+      if(isOpen) loadLeaderboard();
+    });
 
-// Зберігаємо при кожній зміні
-input.addEventListener("input", () => {
-    localStorage.setItem("snakePlayerName", input.value.trim());
-});
-</script>
-  
+    document.getElementById("refreshLbBtn").addEventListener("click", loadLeaderboard);
+
+    // Функція завантаження — показує топ-50 (best per player)
+    function loadLeaderboard(){
+      const list = document.getElementById("lbList");
+      list.innerHTML = "Loading...";
+      const q = query(rootRef, orderByChild("score"), limitToLast(50));
+      onValue(q, snapshot => {
+        const arr = [];
+        snapshot.forEach(s => {
+          const v = s.val();
+          // safety check
+          if(v && v.name) arr.push(v);
+        });
+        // від newest (limitToLast) отримали низхідний порядок за ключем — додатково сортууємо
+        arr.sort((a,b) => b.score - a.score);
+        if(arr.length === 0){
+          list.innerHTML = "<div style='text-align:center; opacity:0.7;'>No scores yet</div>";
+          return;
+        }
+        list.innerHTML = arr.map((x,i) => `
+          <div style="padding:8px 6px; border-bottom:1px solid rgba(0,255,0,0.12); display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:14px;"><b>${i+1}.</b> ${escapeHtml(x.name)}</div>
+            <div style="color:#00ff00; font-weight:700;">${x.score}</div>
+          </div>
+        `).join("");
+      }, { onlyOnce: false });
+    }
+
+    // Допоміжна: ескейп для імені
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); });
+    }
+
+    // Глобальна функція: надсилання рахунку
+    // Логіка: зберігаємо Best Score для гравця (один запис на ім'я)
+    window.sendScore = async function(score){
+      try {
+        const input = document.getElementById("playerNameInput");
+        let name = (input && input.value) ? input.value.trim() : "Player";
+        if(!name) name = "Player";
+        // Щоб уникнути проблем з ключами в Firebase — використовуємо encodeURIComponent
+        const key = encodeURIComponent(name).replace(/\./g, '%2E');
+        const playerRef = ref(db, `leaderboard/${key}`);
+
+        // отримуємо поточний рекорд
+        const snap = await get(playerRef);
+        if(!snap.exists() || score > (snap.val().score || 0)){
+          await set(playerRef, { name: name, score: score, time: Date.now() });
+        }
+      } catch(err) {
+        console.error("sendScore error:", err);
+      }
+    };
+
+    // Завантажуємо leaderboard при першому завантаженні (необов'язково)
+    // loadLeaderboard(); // викликаємо при відкритті панелі
+
+    // Експорт (якщо треба з консолі)
+    window.loadLeaderboard = loadLeaderboard;
+
+  </script>
+
 </body>
 </html>
-
