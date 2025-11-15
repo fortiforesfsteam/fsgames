@@ -28,8 +28,8 @@
       border-radius: 15px;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
       position: relative;
-      width: 100%;
-      max-width: 560px;
+      width: 90%;
+      max-width: 400px;
     }
     .menu, .settings, .game-over { display: none; }
     .menu { display: block; }
@@ -202,24 +202,23 @@
           <span id="whatsBadge" style="display:none; width:16px; height:16px; background:red; color:white; border-radius:50%; font-size:11px; font-weight:bold; align-items:center; justify-content:center; display:flex; animation:blink 1s infinite;">1</span>
         </div>
         <br>
-        It's better to play on PC!<br>
-        Controls: WASD and Swipe — Pause: Space / ▐▐ (on phone)<br>
-        Ver 2.1.5 BETA!
+        It's better to play on PC!
+        Controls: WASD and Swipe — Pause: Space / ▐▐ (on phone)<br>Ver 2.1.2💚
       </div>
 
       <!-- What's New Modal -->
       <div id="whatsNewModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:100;">
-        <div style="background:#111; color:white; border-radius:15px; border:2px solid #00ffff; padding:20px; width:300px; text-align:center; box-shadow:0 0 20px #00ffff;">
+        <div style="background:#111; color:white; border-radius:15px; border:2px solid #00ffff; padding:20px; width:400px; max-width:90%; text-align:center; box-shadow:0 0 20px #00ffff;">
           <h2 style="color:#00ffff; margin-bottom:10px;">What's New? ✨</h2>
           <ul style="text-align:left; font-size:14px; list-style:none; padding-left:10px;">
-            <li><li style="margin-top:10px;"> Ver <b>2.1.2💚</b></li> 
-            <li>Full Backup to version 2.1.2💚</li>
+            <li> Ver <b>2.1.2💚</b></li> 
+            <li>Reverting to version 2.1.2💚</li>
              
             <li><li style="margin-top:10px;"> Ver <b>2.1.8 Ultra beta</b></li>
             <li>Hot Bug Fixes</li>
             <li>The Leaderboard is still not working properly</li>
-            
-            <li style="margin-top:10px;">Ver <b>2.1.6 BETA!!!</b></li>
+          
+            <li>Ver <b>2.1.6 BETA!!!</b></li>
             <li>Bug fix</li>
             <li>Still working on Leaderboard</li>
             <li>Ver <b>2.1.3 - 2.1.5 BETA!!!</b></li>
@@ -673,7 +672,7 @@
     document.getElementById("whatsNewBtn").addEventListener("click", () => { localStorage.setItem("whatsNewSeen", CURRENT_VERSION); whatsBadge.style.display = "none"; });   
   </script>
 
-  <!-- Плеєр музики (залишаю як був) -->
+  <!-- Плеєр музики -->
   <script src="player.js"></script>
 </body>
 </html>
