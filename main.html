@@ -801,7 +801,7 @@ document.getElementById("whatsNewBtn").addEventListener("click", () => {
     position: "fixed",
     top: "50%",
     left: "0",
-    transform: "translate(-100%, -50%)",
+    transform: "translate(0, -50%)",
     background: "#00ff00",
     padding: "10px 14px",
     borderRadius: "12px",
@@ -817,7 +817,7 @@ document.getElementById("whatsNewBtn").addEventListener("click", () => {
   let isOpen = false;
   btn.onclick = () => {
     isOpen = !isOpen;
-    panel.style.left = isOpen ? "0px" : "-320px";
+    panel.style.left = isOpen ? "0px" : "-300px";
     if (isOpen) loadLeaderboard();
   };
 
