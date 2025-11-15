@@ -675,33 +675,34 @@
     document.getElementById("whatsNewBtn").addEventListener("click", () => { localStorage.setItem("whatsNewSeen", CURRENT_VERSION); whatsBadge.style.display = "none"; });
     const nameInput = document.getElementById("playerNameInput");
 
-// Перевірка, чи ім’я вже введене
+    const input = document.getElementById("playerNameInput");
+
+// Перевіряємо, чи є збережене ім'я
 let savedName = localStorage.getItem("snakePlayerName");
 if(savedName){
-  nameInput.value = savedName;
-  nameInput.disabled = true;  // поле заблоковане
+  input.value = savedName;
+  input.disabled = true; // фіксуємо ім'я
+} else {
+  // Коли гравець вперше вводить нік
+  input.addEventListener("change", async () => {
+    let name = input.value.trim();
+    if(!name) name = "Player";
+
+    // Перевірка у Firebase (опціонально, якщо хочеш унікальні ніки)
+    const key = encodeURIComponent(name).replace(/\./g, '%2E');
+    const playerRef = ref(db, `leaderboard/${key}`);
+    const snap = await get(playerRef);
+
+    if(snap.exists()){
+      alert("This name is already taken. Choose another.");
+      input.value = "";
+    } else {
+      // зберігаємо нік і блокуємо поле
+      localStorage.setItem("snakePlayerName", name);
+      input.disabled = true;
+    }
+  });
 }
-
-// При першому введенні
-nameInput.addEventListener("change", async () => {
-  const name = nameInput.value.trim();
-  if(!name) return;
-
-  // Перевіряємо Firebase, чи зайняте ім’я
-  const key = encodeURIComponent(name).replace(/\./g, '%2E');
-  const snap = await get(ref(db, `leaderboard/${key}`));
-
-  if(snap.exists() && snap.val().name !== savedName){
-    alert("This name is taken by another player");
-    nameInput.value = "";
-    return;
-  }
-
-  // Зберігаємо ім’я
-  localStorage.setItem("snakePlayerName", name);
-  nameInput.disabled = true;
-});
-    
   </script>
 
   <!-- Плеєр музики (залишаю як був) -->
@@ -843,3 +844,4 @@ nameInput.addEventListener("change", async () => {
 
 </body>
 </html>
+
