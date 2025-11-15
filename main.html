@@ -664,7 +664,7 @@
       }
     }
 
-    // What's New
+    // What's New?
     document.getElementById("whatsNewBtn").onclick = () => { document.getElementById("whatsNewModal").style.display="flex"; };
     document.getElementById("closeModal").onclick = () => { document.getElementById("whatsNewModal").style.display="none"; };
 
@@ -673,7 +673,35 @@
     const savedVersion = localStorage.getItem("whatsNewSeen");
     if (savedVersion !== CURRENT_VERSION) whatsBadge.style.display = "inline-flex"; else whatsBadge.style.display = "none";
     document.getElementById("whatsNewBtn").addEventListener("click", () => { localStorage.setItem("whatsNewSeen", CURRENT_VERSION); whatsBadge.style.display = "none"; });
+    const nameInput = document.getElementById("playerNameInput");
 
+// Перевірка, чи ім’я вже введене
+let savedName = localStorage.getItem("snakePlayerName");
+if(savedName){
+  nameInput.value = savedName;
+  nameInput.disabled = true;  // поле заблоковане
+}
+
+// При першому введенні
+nameInput.addEventListener("change", async () => {
+  const name = nameInput.value.trim();
+  if(!name) return;
+
+  // Перевіряємо Firebase, чи зайняте ім’я
+  const key = encodeURIComponent(name).replace(/\./g, '%2E');
+  const snap = await get(ref(db, `leaderboard/${key}`));
+
+  if(snap.exists() && snap.val().name !== savedName){
+    alert("This name is taken by another player");
+    nameInput.value = "";
+    return;
+  }
+
+  // Зберігаємо ім’я
+  localStorage.setItem("snakePlayerName", name);
+  nameInput.disabled = true;
+});
+    
   </script>
 
   <!-- Плеєр музики (залишаю як був) -->
@@ -791,23 +819,19 @@
     // Глобальна функція: надсилання рахунку
     // Логіка: зберігаємо Best Score для гравця (один запис на ім'я)
     window.sendScore = async function(score){
-      try {
-        const input = document.getElementById("playerNameInput");
-        let name = (input && input.value) ? input.value.trim() : "Player";
-        if(!name) name = "Player";
-        // Щоб уникнути проблем з ключами в Firebase — використовуємо encodeURIComponent
-        const key = encodeURIComponent(name).replace(/\./g, '%2E');
-        const playerRef = ref(db, `leaderboard/${key}`);
+  try {
+    let name = localStorage.getItem("snakePlayerName") || "Player";
+    const key = encodeURIComponent(name).replace(/\./g, '%2E');
+    const playerRef = ref(db, `leaderboard/${key}`);
 
-        // отримуємо поточний рекорд
-        const snap = await get(playerRef);
-        if(!snap.exists() || score > (snap.val().score || 0)){
-          await set(playerRef, { name: name, score: score, time: Date.now() });
-        }
-      } catch(err) {
-        console.error("sendScore error:", err);
-      }
-    };
+    const snap = await get(playerRef);
+    if(!snap.exists() || score > (snap.val().score || 0)){
+      await set(playerRef, { name, score, time: Date.now() });
+    }
+  } catch(err) {
+    console.error("sendScore error:", err);
+  }
+};
 
     // Завантажуємо leaderboard при першому завантаженні (необов'язково)
     // loadLeaderboard(); // викликаємо при відкритті панелі
