@@ -188,6 +188,28 @@
   <div id="menu" class="menu">
     <h1>Snake Game</h1>
     <p>Best Score: <span id="bestScore">0</span></p>
+    <div id="nameBox" style="
+    margin: 14px 0;
+    display: flex;
+    justify-content: center;
+">
+    <input id="playerNameInput" 
+        type="text" 
+        maxlength="12"
+        placeholder="Enter your name"
+        style="
+            padding: 8px 12px;
+            width: 180px;
+            border-radius: 10px;
+            border: 2px solid #00ff00;
+            background: rgba(0,0,0,0.6);
+            color: #00ff00;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            font-family: Segoe UI;
+        ">
+</div>
     <button onclick="startGame()">Play</button>
     <button onclick="openSettings()">Setting</button>
     <br>
@@ -747,111 +769,125 @@ document.getElementById("whatsNewBtn").addEventListener("click", () => {
   <!-- 🎵 Підключаємо музичний плеєр -->
 <script src="player.js"></script>
 
-  <!-- === Firebase Leaderboard (for GitHub Pages) === -->
+  <!-- === Firebase Leaderboard (Best Score per Player) === -->
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getDatabase, ref, set, get, query, orderByChild, limitToLast, onValue } 
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getDatabase, ref, push, query, orderByChild, limitToLast, onValue }
-    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+/* === 1. Firebase config === */
+const firebaseConfig = {
+  apiKey: "AIzaSyBFLCSFMOo3Km8gX7N5YLh1Rk1xbP73n2k",
+  authDomain: "fsgames-snake-game.firebaseapp.com",
+  databaseURL: "https://fsgames-snake-game-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "fsgames-snake-game",
+  storageBucket: "fsgames-snake-game.appspot.com",
+  messagingSenderId: "423889454890",
+  appId: "1:423889454890:web:0462353a54c1689039c053"
+};
 
-  /* === 1. Firebase config === */
-  const firebaseConfig = {
-    apiKey: "AIzaSyBFLCSFMOo3Km8gX7N5YLh1Rk1xbP73n2k",
-    authDomain: "fsgames-snake-game.firebaseapp.com",
-    databaseURL: "https://fsgames-snake-game-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "fsgames-snake-game",
-    storageBucket: "fsgames-snake-game.firebasestorage.app",
-    messagingSenderId: "423889454890",
-    appId: "1:423889454890:web:0462353a54c1689039c053",
-  };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const lbRef = ref(db, "leaderboard");
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const lbRef = ref(db, "leaderboard");
+/* === 2. Створюємо панель === */
+const panel = document.createElement("div");
+Object.assign(panel.style, {
+  position: "fixed",
+  top: "0",
+  left: "-320px",
+  width: "300px",
+  height: "100vh",
+  background: "rgba(0,0,0,0.85)",
+  color: "white",
+  padding: "20px",
+  borderRight: "2px solid #00ff00",
+  overflowY: "auto",
+  transition: "left 0.35s ease",
+  zIndex: "99999",
+  fontFamily: "Segoe UI"
+});
+panel.innerHTML = `
+  <h2 style="color:#00ff00; text-align:center;">Leaderboard 🏆</h2>
+  <div id="lbList">Loading...</div>
+`;
+document.body.appendChild(panel);
 
-  /* === 2. Створюємо панель === */
-  const panel = document.createElement("div");
-  Object.assign(panel.style, {
-    position: "fixed",
-    top: "0",
-    left: "-320px",
-    width: "300px",
-    height: "100vh",
-    background: "rgba(0,0,0,0.85)",
-    color: "white",
-    padding: "20px",
-    borderRight: "2px solid #00ff00",
-    overflowY: "auto",
-    transition: "left 0.35s ease",
-    zIndex: "99999",
-    fontFamily: "Segoe UI",
+/* === 3. Кнопка 🏆 === */
+const btn = document.createElement("div");
+btn.innerHTML = "🏆";
+Object.assign(btn.style, {
+  position: "fixed",
+  top: "50%",
+  left: "0",
+  transform: "translate(0, -50%)",
+  background: "#00ff00",
+  padding: "10px 14px",
+  borderRadius: "12px",
+  cursor: "pointer",
+  fontSize: "20px",
+  zIndex: "100000",
+  boxShadow: "0 0 12px #00ff00"
+});
+document.body.appendChild(btn);
+
+/* === 4. Логіка відкриття === */
+let isOpen = false;
+btn.onclick = () => {
+  isOpen = !isOpen;
+  panel.style.left = isOpen ? "0px" : "-300px";
+  if(isOpen) loadLeaderboard();
+};
+
+/* === 5. Завантаження Leaderboard === */
+function loadLeaderboard(){
+  const list = document.getElementById("lbList");
+  list.innerHTML = "Loading...";
+
+  const q = query(lbRef, orderByChild("score"), limitToLast(50));
+  onValue(q, snapshot => {
+    const arr = [];
+    snapshot.forEach(s => arr.push(s.val()));
+    arr.sort((a,b) => b.score - a.score);
+
+    list.innerHTML = arr.map((x, i) => `
+      <div style="padding:6px; border-bottom:1px solid #00ff00;">
+        <b>${i+1}.</b> ${x.name}
+        <span style="float:right;color:#00ff00">${x.score}</span>
+      </div>
+    `).join("");
   });
+}
 
-  panel.innerHTML = `
-    <h2 style="color:#00ff00; text-align:center;">Leaderboard 🏆</h2>
-    <div id="lbList">Loading...</div>
-  `;
+/* === 6. Надсилання рахунку === */
+window.sendScore = async function(score){
+  const name = localStorage.getItem("snakePlayerName") || "Player";
+  const playerRef = ref(db, `leaderboard/${name}`);
 
-  document.body.appendChild(panel);
-
-  /* === 3. Кнопка 🏆 === */
-  const btn = document.createElement("div");
-  btn.innerHTML = "🏆";
-  Object.assign(btn.style, {
-    position: "fixed",
-    top: "50%",
-    left: "0",
-    transform: "translate(0, -50%)",
-    background: "#00ff00",
-    padding: "10px 14px",
-    borderRadius: "12px",
-    cursor: "pointer",
-    fontSize: "20px",
-    zIndex: "100000",
-    boxShadow: "0 0 12px #00ff00",
-  });
-
-  document.body.appendChild(btn);
-
-  /* === 4. Логіка відкриття === */
-  let isOpen = false;
-  btn.onclick = () => {
-    isOpen = !isOpen;
-    panel.style.left = isOpen ? "0px" : "-300px";
-    if (isOpen) loadLeaderboard();
-  };
-
-  /* === 5. Завантаження === */
-  function loadLeaderboard() {
-    const list = document.getElementById("lbList");
-    list.innerHTML = "Loading...";
-
-    const q = query(lbRef, orderByChild("score"), limitToLast(50));
-
-    onValue(q, snapshot => {
-      const arr = [];
-      snapshot.forEach(s => arr.push(s.val()));
-      arr.sort((a, b) => b.score - a.score);
-
-      list.innerHTML = arr.map((x, i) => `
-        <div style="padding:6px; border-bottom:1px solid #00ff00;">
-          <b>${i + 1}.</b> ${x.name}
-          <span style="float:right;color:#00ff00">${x.score}</span>
-        </div>
-      `).join("");
-    });
-  }
-
-  /* === 6. Глобальна функція === */
-  window.sendScore = function(score) {
-    const name = localStorage.getItem("snakePlayerName") || "Player";
-    push(lbRef, {
+  // отримуємо попередній рекорд
+  const snapshot = await get(playerRef);
+  if(!snapshot.exists() || score > snapshot.val().score){
+    set(playerRef, {
       name: name,
       score: score,
-      time: Date.now(),
+      time: Date.now()
     });
-  };
-
+  }
+};
 </script>
+
+  <script>
+const input = document.getElementById("playerNameInput");
+
+// Підставляємо збережене ім'я при завантаженні
+input.value = localStorage.getItem("snakePlayerName") || "";
+
+// Зберігаємо при кожній зміні
+input.addEventListener("input", () => {
+    localStorage.setItem("snakePlayerName", input.value.trim());
+});
+</script>
+  
 </body>
 </html>
+
