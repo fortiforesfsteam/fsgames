@@ -189,7 +189,7 @@
     <h1>Snake Game</h1>
     <p>Best Score: <span id="bestScore">0</span></p>
     <button onclick="startGame()">Play</button>
-    <button onclick="openSettings()">Setting⚙</button>
+    <button onclick="openSettings()">Setting</button>
     <br>
     <button onclick="openAchievements()" style="font-size:14px; background:#00c800;">Achievements 🏆</button>
     <br>
@@ -224,7 +224,7 @@
   <br>
   It's better to play on PC!<br>
   Controls: WASD and Swipe — Pause: Space / ▐▐ (on phone)<br>
-  Ver 2.1.2
+  Ver 2.1.3 BETA!
 </div>
 
     <!-- What's New Modal -->
@@ -235,17 +235,17 @@
                   padding: 20px; width: 300px; text-align: center; box-shadow: 0 0 20px #00ffff;">
         <h2 style="color: #00ffff; margin-bottom: 10px;">What's New? ✨</h2>
         <ul style="text-align: left; font-size: 14px; list-style: none; padding-left: 10px;">
-          <li>Ver <b>2.1.2💚</b></li>
+          <li>Ver <b>2.1.3 BETA!</b></li>
+          <li>Testing leader boards</li>
+          
+          <li style="margin-top:10px;">Ver <b>2.1.2💚</b></li>
           <li>⏸ <b>Added game pause</li>
           <li>🎵 <b>Added four tracks and removed one track</li>
           <li>⚙ <b>Various small updates</li>
         
           
           <li style="margin-top:10px;">Ver <b>2.0.9</b></li>
-          <li>💾 <b>Added save settings</li>
-          
-          <li style="margin-top:10px;">Ver <b>2.0.7</b></li>
-          <li>🏆 <b>Added a new achievement</li>                     
+          <li>💾 <b>Added save settings</li>                       
         </ul>
         <button id="closeModal" 
           style="margin-top: 15px; background: #00ffff; color: black; font-weight: bold; 
@@ -609,6 +609,7 @@ function gameOverScreen(){
   game.style.display = "none";
   gameOver.style.display = "block";
   finalScoreEl.innerText = score;
+  sendScore(score);
 
   if(score > bestScore){
     bestScore = score;
@@ -724,7 +725,7 @@ document.getElementById("whatsNewBtn").onclick=()=>{ document.getElementById("wh
 document.getElementById("closeModal").onclick=()=>{ document.getElementById("whatsNewModal").style.display="none"; };
 
 /* --- What's New badge logic --- */
-const CURRENT_VERSION = "2.1.2"; // ← КОЛИ ОНОВИШ КОД — ЗМІНЮЙ ЦЕ
+const CURRENT_VERSION = "2.1.3"; // ← КОЛИ ОНОВИШ КОД — ЗМІНЮЙ ЦЕ
 
 const whatsBadge = document.getElementById("whatsBadge");
 const savedVersion = localStorage.getItem("whatsNewSeen");
@@ -745,6 +746,112 @@ document.getElementById("whatsNewBtn").addEventListener("click", () => {
 
   <!-- 🎵 Підключаємо музичний плеєр -->
 <script src="player.js"></script>
+
+  <!-- === Firebase Leaderboard (for GitHub Pages) === -->
+<script type="module">
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getDatabase, ref, push, query, orderByChild, limitToLast, onValue }
+    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+  /* === 1. Firebase config === */
+  const firebaseConfig = {
+    apiKey: "AIzaSyBFLCSFMOo3Km8gX7N5YLh1Rk1xbP73n2k",
+    authDomain: "fsgames-snake-game.firebaseapp.com",
+    databaseURL: "https://fsgames-snake-game-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "fsgames-snake-game",
+    storageBucket: "fsgames-snake-game.firebasestorage.app",
+    messagingSenderId: "423889454890",
+    appId: "1:423889454890:web:0462353a54c1689039c053",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const lbRef = ref(db, "leaderboard");
+
+  /* === 2. Створюємо панель === */
+  const panel = document.createElement("div");
+  Object.assign(panel.style, {
+    position: "fixed",
+    top: "0",
+    left: "-320px",
+    width: "300px",
+    height: "100vh",
+    background: "rgba(0,0,0,0.85)",
+    color: "white",
+    padding: "20px",
+    borderRight: "2px solid #00ff00",
+    overflowY: "auto",
+    transition: "left 0.35s ease",
+    zIndex: "99999",
+    fontFamily: "Segoe UI",
+  });
+
+  panel.innerHTML = `
+    <h2 style="color:#00ff00; text-align:center;">Leaderboard 🏆</h2>
+    <div id="lbList">Loading...</div>
+  `;
+
+  document.body.appendChild(panel);
+
+  /* === 3. Кнопка 🏆 === */
+  const btn = document.createElement("div");
+  btn.innerHTML = "🏆";
+  Object.assign(btn.style, {
+    position: "fixed",
+    top: "50%",
+    left: "0",
+    transform: "translate(-100%, -50%)",
+    background: "#00ff00",
+    padding: "10px 14px",
+    borderRadius: "12px",
+    cursor: "pointer",
+    fontSize: "20px",
+    zIndex: "100000",
+    boxShadow: "0 0 12px #00ff00",
+  });
+
+  document.body.appendChild(btn);
+
+  /* === 4. Логіка відкриття === */
+  let isOpen = false;
+  btn.onclick = () => {
+    isOpen = !isOpen;
+    panel.style.left = isOpen ? "0px" : "-320px";
+    if (isOpen) loadLeaderboard();
+  };
+
+  /* === 5. Завантаження === */
+  function loadLeaderboard() {
+    const list = document.getElementById("lbList");
+    list.innerHTML = "Loading...";
+
+    const q = query(lbRef, orderByChild("score"), limitToLast(50));
+
+    onValue(q, snapshot => {
+      const arr = [];
+      snapshot.forEach(s => arr.push(s.val()));
+      arr.sort((a, b) => b.score - a.score);
+
+      list.innerHTML = arr.map((x, i) => `
+        <div style="padding:6px; border-bottom:1px solid #00ff00;">
+          <b>${i + 1}.</b> ${x.name}
+          <span style="float:right;color:#00ff00">${x.score}</span>
+        </div>
+      `).join("");
+    });
+  }
+
+  /* === 6. Глобальна функція === */
+  window.sendScore = function(score) {
+    const name = localStorage.getItem("snakePlayerName") || "Player";
+    push(lbRef, {
+      name: name,
+      score: score,
+      time: Date.now(),
+    });
+  };
+
+</script>
 </body>
 </html>
-
